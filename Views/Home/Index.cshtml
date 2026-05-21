@@ -1,8 +1,158 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-5">
+
+    <!-- Hero Section -->
+    <div class="text-center mb-5">
+
+        <h1 class="display-3 fw-bold"
+            style="color:#50817c;">
+            Aircraft Maintenance System
+        </h1>
+
+        <p class="lead text-secondary mt-3">
+            Smart management platform for aircraft operations,
+            maintenance tracking, work orders, and critical alerts.
+        </p>
+
+        <a class="btn btn-lg mt-3 text-white px-4"
+           style="background-color:#50817c;"
+           asp-controller="Aircraft"
+           asp-action="Index">
+
+            Get Started
+        </a>
+
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="row g-4">
+
+        <!-- Aircraft -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="mb-3">
+                        <i class="bi bi-airplane-engines fs-1"
+                           style="color:#50817c;"></i>
+                    </div>
+
+                    <h4 class="fw-semibold">
+                        Aircraft
+                    </h4>
+
+                    <p class="text-muted small">
+                        Manage aircraft fleet details,
+                        operational status, and records.
+                    </p>
+
+                    <a asp-controller="Aircraft"
+                       asp-action="Index"
+                       class="btn btn-outline-success rounded-pill px-4">
+
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="mb-3">
+                        <i class="bi bi-tools fs-1"
+                           style="color:#50817c;"></i>
+                    </div>
+
+                    <h4 class="fw-semibold">
+                        Maintenance
+                    </h4>
+
+                    <p class="text-muted small">
+                        Track preventive and corrective
+                        maintenance activities efficiently.
+                    </p>
+
+                    <a asp-controller="Maintenance"
+                       asp-action="Index"
+                       class="btn btn-outline-success rounded-pill px-4">
+
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Work Orders -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="mb-3">
+                        <i class="bi bi-clipboard-check fs-1"
+                           style="color:#50817c;"></i>
+                    </div>
+
+                    <h4 class="fw-semibold">
+                        Work Orders
+                    </h4>
+
+                    <p class="text-muted small">
+                        Create, assign, and monitor
+                        engineering work orders.
+                    </p>
+
+                    <a asp-controller="WorkOrders"
+                       asp-action="Index"
+                       class="btn btn-outline-success rounded-pill px-4">
+
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="mb-3">
+                        <i class="bi bi-bell-fill fs-1 text-danger"></i>
+                    </div>
+
+                    <h4 class="fw-semibold">
+                        Alerts
+                    </h4>
+
+                    <p class="text-muted small">
+                        Monitor important operational
+                        notifications and system alerts.
+                    </p>
+
+                    <a asp-controller="Alerts"
+                       asp-action="Index"
+                       class="btn btn-outline-danger rounded-pill px-4">
+
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </div>

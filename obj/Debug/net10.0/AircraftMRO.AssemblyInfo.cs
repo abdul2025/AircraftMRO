@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AircraftMRO")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dbd8faf08c626a3c38986b3773688eee081bf3c9")]
 [assembly: System.Reflection.AssemblyProductAttribute("AircraftMRO")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AircraftMRO")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

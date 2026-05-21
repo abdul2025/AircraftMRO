@@ -1,0 +1,20 @@
+{
+  "[csharp]": {
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    },
+    "editor.suggestOnTriggerCharacters": false,
+    "editor.parameterHints.enabled": false
+  },
+
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "csharp": false
+  },
+
+  "github.copilot.inlineSuggest.enable": false
+}

@@ -56,6 +56,9 @@ publish/
 # User secrets
 
 secrets.json
+*.env
+*.local
+*.sh
 
 
 # Coverage

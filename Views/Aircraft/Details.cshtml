@@ -1,0 +1,400 @@
+@using AircraftMRO.Models.ViewModels.Aircraft
+@model AircraftDetailsViewModel
+
+@{
+    ViewData["Title"] = "Aircraft Details";
+}
+
+<div class="container-fluid px-0">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+
+        <div>
+
+            <h2 class="fw-bold based-text mb-1">
+               Aircraft Tail: @Model.TailNumber
+            </h2>
+
+            <p class="text-muted mb-0 small">
+                Aircraft Overview & Recent Activity
+            </p>
+
+        </div>
+
+        <div>
+
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+
+                <i class="bi bi-arrow-left me-2"></i>
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="row g-3">
+
+        <!-- Maintenance -->
+        <div class="col-12 col-xl-4">
+
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+
+                <div class="card-header card-bg-header bg based-bg-table-header border-0 py-3 px-3">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h6 class="fw-semibold based-text mb-1">
+                                Maintenance
+                            </h6>
+
+                            <small class="text-muted">
+                                Recent maintenance records
+                            </small>
+
+                        </div>
+
+                        <span class="badge bg-light text-dark border fw-normal">
+                            @Model.LightMaintenanceRecords.Count()
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    @if (Model.LightMaintenanceRecords.Any())
+                    {
+                        <div class="table-responsive overflow-auto"
+     style="max-height: 570px;"">
+
+                            <table class="table table-sm table-hover align-middle mb-0 small">
+
+                                <thead class="table-light position-sticky top-0"  style="--bs-table-bg: #e9f4ff">
+
+                                    <tr>
+
+                                        <th class="text-muted fw-semibold">
+                                            Type
+                                        </th>
+
+                                        <th class="text-muted fw-semibold">
+                                            Status
+                                        </th>
+
+                                        <th class="text-end text-muted fw-semibold">
+                                            View
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var item in Model.LightMaintenanceRecords)
+                                    {
+                                        <tr>
+
+                                            <td class="fw-semibold">
+                                                @item.Type
+                                            </td>
+
+                                            <td>
+
+                                                <span class="badge bg-light text-dark border fw-normal">
+                                                    @item.Status
+                                                </span>
+
+                                            </td>
+
+                                            <td class="text-end">
+
+                                                <a asp-controller="Maintenance" asp-action="Details" asp-route-id="@item.Id"
+                                                   class="btn btn-sm btn-outline-secondary rounded-circle">
+
+                                                    <i class="bi bi-eye"></i>
+
+                                                </a>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+
+                            <i class="bi bi-tools fs-3 text-muted mb-3 d-block"></i>
+
+                            <p class="text-muted small mb-0">
+                                No maintenance records available.
+                            </p>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Work Orders -->
+        <div class="col-12 col-xl-4">
+
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+
+                <div class="card-header card-bg-header border-0 py-3 px-3">
+
+                    <div class="d-flex justify-content-between align-items-center ">
+
+                        <div>
+
+                            <h6 class="fw-semibold based-text mb-1">
+                                Work Orders
+                            </h6>
+
+                            <small class="text-muted">
+                                Recent engineering tasks
+                            </small>
+
+                        </div>
+
+                        <span class="badge bg-light text-dark border fw-normal">
+                            @Model.LightWorkOrders.Count()
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    @if (Model.LightWorkOrders.Any())
+                    {
+                        <div class="table-responsive overflow-auto"
+     style="max-height: 570px;"">
+
+                            <table class="table table-sm table-hover align-middle mb-0 small ">
+
+                                <thead class="table-light position-sticky top-0"  style="--bs-table-bg: #e9f4ff">
+
+                                    <tr>
+
+                                        <th class="text-muted fw-semibold">
+                                            Priority
+                                        </th>
+
+                                        <th class="text-muted fw-semibold">
+                                            Status
+                                        </th>
+
+                                        <th class="text-end text-muted fw-semibold">
+                                            View
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var item in Model.LightWorkOrders)
+                                    {
+                                        <tr>
+
+                                            <td class="fw-semibold">
+                                                @item.Priority
+                                            </td>
+
+                                            <td>
+
+                                                <span class="badge bg-light text-dark border fw-normal">
+                                                    @item.Status
+                                                </span>
+
+                                            </td>
+
+                                            <td class="text-end">
+
+                                                <a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@item.Id"
+                                                   class="btn btn-sm btn-outline-secondary rounded-circle">
+
+                                                    <i class="bi bi-eye"></i>
+
+                                                </a>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+
+                            <i class="bi bi-clipboard-check fs-3 text-muted mb-3 d-block"></i>
+
+                            <p class="text-muted small mb-0">
+                                No work orders available.
+                            </p>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Alerts -->
+        <div class="col-12 col-xl-4">
+
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+
+                <div class="card-header card-bg-header card-bg-header border-0 py-3 px-3">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h6 class="fw-semibold based-text mb-1">
+                                Alerts
+                            </h6>
+
+                            <small class="text-muted">
+                                Recent operational alerts
+                            </small>
+
+                        </div>
+
+                        <span class="badge bg-light text-dark border fw-normal">
+                            @Model.LightAlerts.Count()
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+                    @if (Model.LightAlerts.Any())
+                    {
+                        <div class="table-responsive overflow-auto"
+     style="max-height: 570px;"">
+
+                            <table class="table table-sm table-hover align-middle mb-0 small">
+
+                                <thead class="table-light position-sticky top-0" style="--bs-table-bg: #e9f4ff">
+
+                                    <tr>
+
+                                        <th class="text-muted fw-semibold">
+                                            Severity
+                                        </th>
+
+                                        <th class="text-muted fw-semibold">
+                                            State
+                                        </th>
+
+                                        <th class="text-end text-muted fw-semibold">
+                                            View
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var item in Model.LightAlerts)
+                                    {
+                                        <tr>
+
+                                            <td>
+
+                                                <span class="badge text-bg-warning fw-normal">
+                                                    @item.Severity
+                                                </span>
+
+                                            </td>
+
+                                            <td>
+
+                                                @if (item.IsResolved)
+                                                {
+                                                    <span class="badge text-bg-success fw-normal">
+                                                        Resolved
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge text-bg-danger fw-normal">
+                                                        Open
+                                                    </span>
+                                                }
+
+                                            </td>
+
+                                            <td class="text-end">
+
+                                                <a asp-controller="Alerts" asp-action="Details" asp-route-id="@item.Id"
+                                                   class="btn btn-sm btn-outline-secondary rounded-circle">
+
+                                                    <i class="bi bi-eye"></i>
+
+                                                </a>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+
+                            <i class="bi bi-bell fs-3 text-muted mb-3 d-block"></i>
+
+                            <p class="text-muted small mb-0">
+                                No alerts available.
+                            </p>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

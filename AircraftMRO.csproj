@@ -12,6 +12,12 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharedLibraries\SharedKernel.Logging\SharedKernel.Logging.csproj" />
   </ItemGroup>
 
 </Project>

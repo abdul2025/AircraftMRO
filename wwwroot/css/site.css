@@ -19,6 +19,7 @@ html {
 
 body {
   margin-bottom: 60px;
+  background-color: var(--page-background);
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -28,4 +29,46 @@ body {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+
+:root {
+    --based-color: #3a4461;
+    --based-color-hover: #252b39;
+    --based-text: #ffffff;
+    --border-color: #3a4461;
+    --btn-based-color: #fff;
+    --page-background: #fefeff;
+    --table-header-bg-based: #e1e1e3;
+
+}
+
+/* Background */
+.based-bg {
+    background-color: var(--based-color) !important;
+}
+
+/* Text */
+.based-text {
+    color: var(--based-color) !important;
+}
+
+/* Buttons */
+.btn-based {
+    background-color: var(--based-color);
+    border-color: var(--based-color);
+    color: var(--btn-based-color);
+}
+
+.btn-based:hover {
+    background-color: var(--based-color-hover);
+    border-color: var(--based-color-hover);
+}
+
+.based-bg-table-header {
+    --bs-table-bg: var(--table-header-bg-based) !important;
+}
+
+.card-bg-header {
+    background-color: var(--table-header-bg-based) !important;
 }

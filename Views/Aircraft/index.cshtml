@@ -1,8 +1,243 @@
+@using AircraftMRO.Models.ViewModels
+@model IEnumerable<AircraftListViewModel>
+
 @{
-    ViewData["Title"] = "Aircraft";
+    ViewData["Title"] = "Aircraft Fleet";
 }
 
+<div class="container-fluid px-0">
 
-<div class="container py-5">
-    <h1>Aircraft</h1>
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 based-text">
+
+        <div>
+
+            <h3 class="fw-bold mb-1">
+                Aircraft Fleet
+            </h3>
+
+            <p class="text-muted mb-0">
+                Manage and monitor all registered aircraft.
+            </p>
+
+        </div>
+
+        <!-- Create Button -->
+        <button class="btn btn-based rounded-pill px-4" onclick="openCrudModal('/Aircraft/Create')">
+
+            <i class="bi bi-plus-circle me-2"></i>
+            Add Aircraft
+
+        </button>
+
+    </div>
+
+    <!-- Table Card -->
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body p-2 p-md-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0 small">
+
+                    <thead class="table-light text-center based-bg-table-header">
+
+                        <tr>
+
+                            <th class="py-2 based-text text-nowrap">Aircraft</th>
+                            <th class="py-2 based-text text-nowrap">Manufacturer</th>
+                            <th class="py-2 based-text text-nowrap">Status</th>
+                            <th class="py-2 based-text text-nowrap">Flight Hours</th>
+                            <th class="py-2 based-text text-nowrap">Maintenance</th>
+                            <th class="py-2 based-text text-nowrap">Work Orders</th>
+                            <th class="py-2 based-text text-nowrap">Alerts</th>
+                            <th class="py-2 based-text text-nowrap">State</th>
+                            <th class="py-2 based-text text-nowrap">Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (AircraftListViewModel item in Model)
+                            {
+                                <tr class="text-center align-middle">
+
+                                    <!-- Aircraft -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <div class="d-flex flex-column align-items-center">
+
+                                            <div class="fw-semibold">
+                                                @item.TailNumber
+                                            </div>
+
+                                            <small class="text-muted">
+                                                @item.Model
+                                            </small>
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- Manufacturer -->
+                                    <td class="py-2 based-text text-nowrap">
+                                        @item.Manufacturer
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        @if (item.Status.ToString() == "Active")
+                                        {
+                                            <span class="badge text-bg-success fw-normal">
+                                                @item.Status
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill text-bg-secondary px-3 py-2">
+                                                @item.Status
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- Flight Hours -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <span class="fw-semibold">
+                                            @item.TotalFlightHours hrs
+                                        </span>
+
+                                    </td>
+
+                                    <!-- Maintenance -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <span class="badge text-bg-light border px-3 py-2">
+                                            @item.MaintenanceCount
+                                        </span>
+
+                                    </td>
+
+                                    <!-- Work Orders -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <span class="badge text-bg-light border px-3 py-2">
+                                            @item.WorkOrderCount
+                                        </span>
+
+                                    </td>
+
+                                    <!-- Alerts -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <span class="badge text-bg-light border px-3 py-2">
+                                            @item.AlertCount
+                                        </span>
+
+                                    </td>
+
+                                    <!-- State -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        @if (item.IsDeleted)
+                                        {
+                                            <span class="badge text-bg-danger px-3 py-2">
+                                                Deleted
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-success px-3 py-2">
+                                                Active
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <div class="d-flex flex-wrap justify-content-center gap-2">
+
+                                            <!-- Details -->
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border">
+
+                                                <i class="bi bi-eye"></i>
+
+                                            </a>
+
+                                            <!-- Edit -->
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    onclick="openCrudModal('/Aircraft/Edit/@item.Id')">
+
+                                                <i class="bi bi-pencil"></i>
+
+                                            </button>
+
+                                            <!-- Delete -->
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="openCrudModal('/Aircraft/Delete/@item.Id')">
+
+                                                <i class="bi bi-trash"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="9" class="text-center py-5">
+
+                                    <div class="py-4">
+
+                                        <div class="mb-3">
+                                            <i class="bi bi-airplane-engines fs-1 text-muted"></i>
+                                        </div>
+
+                                        <h5 class="fw-semibold mb-2">
+                                            No Aircraft Available
+                                        </h5>
+
+                                        <p class="text-muted mb-4">
+                                            Start by adding your first aircraft to the fleet.
+                                        </p>
+
+                                        <button class="btn btn-dark rounded-pill px-4" data-bs-toggle="modal"
+                                                data-bs-target="#createAircraftModal">
+
+                                            <i class="bi bi-plus-circle me-2"></i>
+                                            Add Aircraft
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>

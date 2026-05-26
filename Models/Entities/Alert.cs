@@ -22,6 +22,6 @@ namespace AircraftMRO.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public bool IsResolved { get; set; } = false;
+        public bool IsResolved { get; set; } = false;
     }
 }

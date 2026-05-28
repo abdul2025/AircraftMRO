@@ -7,9 +7,17 @@ namespace AircraftMRO.Models
     public class Aircraft{
         public int Id { get; set; }
 
+
+        private string _tailNumber { get; set; } = string.Empty;
+
         [Required]
         [MaxLength(20)]
-        public string TailNumber { get; set; } = string.Empty;
+        public string TailNumber
+        {
+            get => _tailNumber;
+
+            set => _tailNumber = value.Trim().ToUpper();
+        }
 
         [Required]
         [MaxLength(50)]

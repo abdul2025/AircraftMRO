@@ -1,18 +1,16 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using AircraftMRO.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
-namespace AircraftMRO.Models
+namespace AircraftMRO.Models.ViewModels.WorkOrder
 {
-    public class WorkOrder
+    public class WorkOrderListViewModel
     {
         public int Id { get; set; }
 
         [Required]
         public int AircraftId { get; set; }
 
-        [ForeignKey(nameof(AircraftId))]
-        public Aircraft Aircraft { get; set; } = null!;
+        public string AircraftTailNumber { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(200)]
@@ -22,7 +20,7 @@ namespace AircraftMRO.Models
 
         public WorkOrderStatus Status { get; set; } = WorkOrderStatus.Open;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         public DateTime? CompletedAt { get; set; }
     }

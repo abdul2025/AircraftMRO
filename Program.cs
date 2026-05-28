@@ -5,6 +5,7 @@ using SharedKernel.Logging.Infrastructure;
 using Serilog;
 using AircraftMRO.Services;
 using AircraftMRO.Services.Interfaces;
+using AircraftMRO.Repositories;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -36,6 +37,9 @@ builder.Services.AddControllersWithViews();
 // START New Registry of any services
 builder.Services.AddSingleton<IAppLogger, CustomAppLogger>();
 builder.Services.AddScoped<IAircraftService, AircraftService>();
+// This to handle the generic assigning of model as per each initiate for the BaseRepo
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
 // END New Registry of any services
 
 

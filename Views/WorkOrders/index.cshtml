@@ -1,8 +1,276 @@
+@using AircraftMRO.Models.ViewModels.WorkOrder
+@model IEnumerable<WorkOrderListViewModel>
+
 @{
     ViewData["Title"] = "Work Orders";
 }
 
+<div class="container-fluid px-0">
 
-<div class="container py-5">
-    <h1>WorkOrders</h1>
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 based-text">
+
+        <div>
+
+            <h3 class="fw-bold mb-1">
+                Work Orders
+            </h3>
+
+            <p class="text-muted mb-0">
+                Track and manage all aircraft maintenance work orders.
+            </p>
+
+        </div>
+
+        <!-- Create Button -->
+        <button class="btn btn-based rounded-pill px-4" onclick="openCrudModal('/WorkOrder/Create')">
+
+            <i class="bi bi-plus-circle me-2"></i>
+            Add Work Order
+
+        </button>
+
+    </div>
+
+    <!-- Table Card -->
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body p-2 p-md-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0 small">
+
+                    <thead class="table-light text-center based-bg-table-header">
+
+                        <tr>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Description & ID
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Aircraft ID
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Priority
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Status
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Created
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Completed
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (WorkOrderListViewModel item in Model)
+                            {
+                                <tr class="text-center align-middle">
+
+                                    <!-- Work Order -->
+                                    <td class="py-2 based-text">
+
+                                        <div class="d-flex flex-column align-items-center">
+
+                                            <div class="fw-semibold text-truncate" style="max-width: 280px;">
+
+                                                @item.Description
+
+                                            </div>
+
+                                            <small class="text-muted">
+                                                WO-@item.Id
+                                            </small>
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- Aircraft -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <div class="d-flex flex-column align-items-center">
+
+                                            <div class="fw-semibold">
+                                                @item.AircraftId
+                                            </div>
+
+                                            <small class="text-muted">
+                                                @item.AircraftTailNumber
+                                            </small>
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- Priority -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        @if (item.Priority.ToString() == "Critical")
+                                        {
+                                            <span class="badge text-bg-danger px-3 py-2">
+                                                @item.Priority
+                                            </span>
+                                        }
+                                        else if (item.Priority.ToString() == "High")
+                                        {
+                                            <span class="badge text-bg-warning px-3 py-2">
+                                                @item.Priority
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-secondary px-3 py-2">
+                                                @item.Priority
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        @if (item.Status.ToString() == "Open")
+                                        {
+                                            <span class="badge text-bg-primary px-3 py-2">
+                                                @item.Status
+                                            </span>
+                                        }
+                                        else if (item.Status.ToString() == "InProgress")
+                                        {
+                                            <span class="badge text-bg-warning px-3 py-2">
+                                                @item.Status
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-success px-3 py-2">
+                                                @item.Status
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- Created -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        @item.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+                                    </td>
+
+                                    <!-- Completed -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        @if (item.CompletedAt.HasValue)
+                                        {
+                                            @item.CompletedAt.Value.ToString("dd MMM yyyy hh:mm tt")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Pending
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="py-2 based-text text-nowrap">
+
+                                        <div class="d-flex flex-wrap justify-content-center gap-2">
+
+                                            <!-- Details -->
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border">
+
+                                                <i class="bi bi-eye"></i>
+
+                                            </a>
+
+                                            <!-- Edit -->
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    onclick="openCrudModal('/WorkOrder/Edit/@item.Id')">
+
+                                                <i class="bi bi-pencil"></i>
+
+                                            </button>
+
+                                            <!-- Delete -->
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="openCrudModal('/WorkOrder/Delete/@item.Id')">
+
+                                                <i class="bi bi-trash"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="7" class="text-center py-5">
+
+                                    <div class="py-4">
+
+                                        <div class="mb-3">
+
+                                            <i class="bi bi-clipboard-check fs-1 text-muted"></i>
+
+                                        </div>
+
+                                        <h5 class="fw-semibold mb-2">
+                                            No Work Orders Available
+                                        </h5>
+
+                                        <p class="text-muted mb-4">
+                                            Start by creating your first work order.
+                                        </p>
+
+                                        <button class="btn btn-dark rounded-pill px-4"
+                                                onclick="openCrudModal('/WorkOrder/Create')">
+
+                                            <i class="bi bi-plus-circle me-2"></i>
+                                            Add Work Order
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>

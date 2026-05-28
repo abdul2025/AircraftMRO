@@ -34,7 +34,12 @@
             </label>
 
             <input asp-for="TailNumber"
-                   class="form-control" />
+                   class="form-control bg-light"
+                   readonly />
+
+            <small class="text-muted">
+                Tail number cannot be changed.
+            </small>
 
             <span asp-validation-for="TailNumber"
                   class="text-danger small">
@@ -96,3 +101,5 @@
     </div>
 
 </form>
+
+<partial name="_ValidationScriptsPartial" />

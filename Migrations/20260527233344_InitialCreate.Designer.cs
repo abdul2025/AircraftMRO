@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AircraftMRO.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260522012445_init")]
-    partial class init
+    [Migration("20260527233344_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

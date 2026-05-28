@@ -145,12 +145,12 @@
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-    // Custom JS
+    @* // Custom JS *@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/error.js"></script>
     <script src="~/js/crud-modal.js"></script>
 
-    // Allow using JS and CSS globally over the prject
+    @* // Allow using JS and CSS globally over the prject *@
     @await RenderSectionAsync("Scripts", required: false)
     @await RenderSectionAsync("Styles", required: false)
 </body>

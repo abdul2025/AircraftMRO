@@ -14,6 +14,7 @@
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AircraftMRO.styles.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -24,7 +25,7 @@
             <div class="container-fluid">
 
                 <!-- Sidebar Toggle -->
-                <button class="btn btn-outline-dark me-3"  type="button" data-bs-toggle="offcanvas"
+                <button class="btn btn-outline-dark me-3" type="button" data-bs-toggle="offcanvas"
                         data-bs-target="#sidebar" aria-controls="sidebar">
                     <i class="bi bi-list"></i>
                 </button>
@@ -54,7 +55,8 @@
     </header>
 
     <!-- Sidebar -->
-    <div class="offcanvas offcanvas-start text-bg" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel" style="background-color: #000107;">
+    <div class="offcanvas offcanvas-start text-bg" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel"
+         style="background-color: #000107;">
 
         <!-- Sidebar Header -->
         <div class="offcanvas-header border-bottom">
@@ -149,6 +151,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/error.js"></script>
     <script src="~/js/crud-modal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     @* // Allow using JS and CSS globally over the prject *@
     @await RenderSectionAsync("Scripts", required: false)

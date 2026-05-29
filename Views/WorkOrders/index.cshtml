@@ -1,5 +1,9 @@
+@using AircraftMRO.Common.Pagination
 @using AircraftMRO.Models.ViewModels.WorkOrder
-@model IEnumerable<WorkOrderListViewModel>
+
+@model PagedResult<WorkOrderListViewModel>
+
+
 
 @{
     ViewData["Title"] = "Work Orders";
@@ -23,12 +27,76 @@
         </div>
 
         <!-- Create Button -->
-        <button class="btn btn-based rounded-pill px-4" onclick="openCrudModal('/WorkOrder/Create')">
+        <button class="btn btn-based rounded-pill px-4" onclick="openCrudModal('/WorkOrders/Create')">
 
             <i class="bi bi-plus-circle me-2"></i>
             Add Work Order
 
         </button>
+
+    </div>
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm rounded-4 mb-2 based-filter-bg">
+
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <!-- Search -->
+                    <div class="col-md-4">
+
+                        <label class="form-label fw-semibold">
+                            Search
+                        </label>
+
+                        <input type="text" name="Search" value="@Context.Request.Query["Search"]" class="form-control"
+                               placeholder="Description or tail number" />
+
+                    </div>
+
+                    <!-- Page Size -->
+                    <div class="col-md-2">
+
+                        <label class="form-label fw-semibold">
+                            Page Size
+                        </label>
+
+                        <select name="PageSize" class="form-select">
+
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="col-md-3">
+
+                        <button type="submit" class="btn btn-based px-4">
+
+                            <i class="bi bi-search me-2"></i>
+                            Filter
+
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-light border ms-2">
+
+                            Reset
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
 
@@ -46,7 +114,7 @@
                         <tr>
 
                             <th class="py-2 based-text text-nowrap">
-                                Description & ID
+                                Description
                             </th>
 
                             <th class="py-2 based-text text-nowrap">
@@ -68,6 +136,11 @@
                             <th class="py-2 based-text text-nowrap">
                                 Completed
                             </th>
+                            
+
+                            <th class="py-2 based-text text-nowrap">
+                                Maintenance Records
+                            </th>
 
                             <th class="py-2 based-text text-nowrap">
                                 Actions
@@ -79,29 +152,19 @@
 
                     <tbody>
 
-                        @if (Model != null && Model.Any())
+                        @if (Model.Items.Any())
                         {
-                            @foreach (WorkOrderListViewModel item in Model)
+                            @foreach (WorkOrderListViewModel item in Model.Items)
                             {
                                 <tr class="text-center align-middle">
 
                                     <!-- Work Order -->
-                                    <td class="py-2 based-text">
-
-                                        <div class="d-flex flex-column align-items-center">
-
-                                            <div class="fw-semibold text-truncate" style="max-width: 280px;">
-
+                                    <td class="py-1 based-text">
+                                        <div class="lh-sm">
+                                            <div class="small fw-semibold">
                                                 @item.Description
-
                                             </div>
-
-                                            <small class="text-muted">
-                                                WO-@item.Id
-                                            </small>
-
                                         </div>
-
                                     </td>
 
                                     <!-- Aircraft -->
@@ -177,17 +240,13 @@
 
                                     <!-- Completed -->
                                     <td class="py-2 based-text text-nowrap">
+                                        @(item.CompletedAt?.ToString("dd MMM yyyy hh:mm tt") ?? "Pending")
+                                    </td>
+                                    <td class="py-2 based-text text-nowrap">
 
-                                        @if (item.CompletedAt.HasValue)
-                                        {
-                                            @item.CompletedAt.Value.ToString("dd MMM yyyy hh:mm tt")
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">
-                                                Pending
-                                            </span>
-                                        }
+                                        <span class="badge bg-info-subtle text-dark border px-3 py-2">
+                                            @item.MaintenanceRecordCount
+                                        </span>
 
                                     </td>
 
@@ -205,7 +264,7 @@
 
                                             <!-- Edit -->
                                             <button class="btn btn-sm btn-outline-primary"
-                                                    onclick="openCrudModal('/WorkOrder/Edit/@item.Id')">
+                                                    onclick="openCrudModal('/WorkOrders/Edit/@item.Id')">
 
                                                 <i class="bi bi-pencil"></i>
 
@@ -213,7 +272,7 @@
 
                                             <!-- Delete -->
                                             <button class="btn btn-sm btn-outline-danger"
-                                                    onclick="openCrudModal('/WorkOrder/Delete/@item.Id')">
+                                                    onclick="openCrudModal('/WorkOrders/Delete/@item.Id')">
 
                                                 <i class="bi bi-trash"></i>
 
@@ -230,7 +289,7 @@
                         {
                             <tr>
 
-                                <td colspan="7" class="text-center py-5">
+                                <td colspan="8" class="text-center py-5">
 
                                     <div class="py-4">
 
@@ -249,7 +308,7 @@
                                         </p>
 
                                         <button class="btn btn-dark rounded-pill px-4"
-                                                onclick="openCrudModal('/WorkOrder/Create')">
+                                                onclick="openCrudModal('/WorkOrders/Create')">
 
                                             <i class="bi bi-plus-circle me-2"></i>
                                             Add Work Order
@@ -272,5 +331,81 @@
         </div>
 
     </div>
+    <!-- Pagination -->
+    @{
+        int startPage = Math.Max(1, Model.PageNumber - 2);
+        int endPage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
+    }
 
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-3 mb-5">
+            <ul class="pagination justify-content-center custom-pagination">
+
+                <!-- Previous -->
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index" asp-route-PageNumber="@(Model.PageNumber - 1)"
+                       asp-route-Search="@Context.Request.Query["Search"]" asp-route-PageSize="@Model.PageSize">
+                        Previous
+                    </a>
+                </li>
+
+                <!-- First page -->
+                @if (startPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-PageNumber="1"
+                           asp-route-Search="@Context.Request.Query["Search"]" asp-route-PageSize="@Model.PageSize">
+                            1
+                        </a>
+                    </li>
+
+                    @if (startPage > 2)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    }
+                }
+
+                <!-- Current window -->
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-PageNumber="@i"
+                           asp-route-Search="@Context.Request.Query["Search"]" asp-route-PageSize="@Model.PageSize">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                <!-- Last page -->
+                @if (endPage < Model.TotalPages)
+                {
+                    @if (endPage < Model.TotalPages - 1)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    }
+
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-PageNumber="@Model.TotalPages"
+                           asp-route-Search="@Context.Request.Query["Search"]" asp-route-PageSize="@Model.PageSize">
+                            @Model.TotalPages
+                        </a>
+                    </li>
+                }
+
+                <!-- Next -->
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index" asp-route-PageNumber="@(Model.PageNumber + 1)"
+                       asp-route-Search="@Context.Request.Query["Search"]" asp-route-PageSize="@Model.PageSize">
+                        Next
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    }
 </div>

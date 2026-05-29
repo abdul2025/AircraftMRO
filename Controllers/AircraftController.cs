@@ -5,6 +5,7 @@ using AircraftMRO.Models.ViewModels.Aircraft;
 using AircraftMRO.Models;
 using AircraftMRO.Repositories;
 using AircraftMRO.Common.Results;
+using AircraftMRO.Common.Filters;
 
 namespace AircraftMRO.Controllers
 {
@@ -24,15 +25,15 @@ namespace AircraftMRO.Controllers
             _repository = repository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(AircraftFilter filter)
         {
-            var aircrafts = await _aircraftService.GetAircraftAsync();
+            var aircrafts = await _aircraftService.GetAircraftAsync(filter);
             return View(aircrafts);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var result = await _aircraftService.GetAircraftDetailsAsync(id);
+            ServiceResult<AircraftDetailsViewModel> result = await _aircraftService.GetAircraftDetailsAsync(id);
 
             if (!result.Success)
                 return NotFound();

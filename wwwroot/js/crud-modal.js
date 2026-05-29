@@ -25,7 +25,16 @@ async function openCrudModal(url) {
 
     document.getElementById('crudModalContent').innerHTML = html;
 
-    // IMPORTANT
+    // Initialize Tom Select only if present
+    const aircraftSelect = document.getElementById('aircraftSelect');
+
+    if (aircraftSelect && !aircraftSelect.tomselect) {
+        new TomSelect(aircraftSelect, {
+            create: false,
+            placeholder: 'Search aircraft...'
+        });
+    }
+
     initializeValidation();
 
     bindCrudForm();

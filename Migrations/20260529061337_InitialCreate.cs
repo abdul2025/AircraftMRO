@@ -54,30 +54,6 @@ namespace AircraftMRO.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MaintenanceRecords",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AircraftId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    ScheduledDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CompletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MaintenanceRecords", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MaintenanceRecords_Aircrafts_AircraftId",
-                        column: x => x.AircraftId,
-                        principalTable: "Aircrafts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "WorkOrders",
                 columns: table => new
                 {
@@ -101,15 +77,45 @@ namespace AircraftMRO.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "MaintenanceRecords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    WorkOrderId = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    ScheduledDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CompletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MaintenanceRecords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MaintenanceRecords_WorkOrders_WorkOrderId",
+                        column: x => x.WorkOrderId,
+                        principalTable: "WorkOrders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Aircrafts_TailNumber",
+                table: "Aircrafts",
+                column: "TailNumber",
+                unique: true);
+
             migrationBuilder.CreateIndex(
                 name: "IX_Alerts_AircraftId",
                 table: "Alerts",
                 column: "AircraftId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MaintenanceRecords_AircraftId",
+                name: "IX_MaintenanceRecords_WorkOrderId",
                 table: "MaintenanceRecords",
-                column: "AircraftId");
+                column: "WorkOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WorkOrders_AircraftId",

@@ -12,6 +12,8 @@ using AircraftMRO.Models;
 using AircraftMRO.Repositories;
 using Npgsql;
 using Npgsql.PostgresTypes;
+using AircraftMRO.Common.Pagination;
+using AircraftMRO.Common.Filters;
 
 
 namespace AircraftMRO.Services
@@ -33,23 +35,59 @@ namespace AircraftMRO.Services
 
 
 
-        public async Task<IEnumerable<AircraftListViewModel>> GetAircraftAsync()
+        public async Task<PagedResult<AircraftListViewModel>> GetAircraftAsync(AircraftFilter filter)
         {
-            var aircrafts = await _context.Aircrafts.Select(a => new AircraftListViewModel
+            // IQueryable Making it as query dynamically with filter and where, and happen in db not in memory  
+            IQueryable<Aircraft> query = _context.Aircrafts.AsNoTracking(); // Read no need for tracking of changes, less memory usage and faster queries 
+
+            // both above and below doing the same but above is more explicit telling var query is IQueryable
+            // var query = _context.Aircrafts
+            // .AsNoTracking() 
+            // .AsQueryable(); 
+            if (!string.IsNullOrWhiteSpace(filter.Search))
             {
-                Id = a.Id,
-                TailNumber = a.TailNumber,
-                Model = a.Model,
-                Manufacturer = a.Manufacturer,
-                Status = a.Status,
-                TotalFlightHours = a.TotalFlightHours,
-                MaintenanceCount = a.MaintenanceRecords.Count(),
-                WorkOrderCount = a.WorkOrders.Count(),
-                AlertCount = a.Alerts.Count(),
+                string search = filter.Search.Trim();
+                // Search by text input
+                query = query.Where(a => // EF.Functions.ILike PostgreSQL's and Case-insensitive
+                    EF.Functions.ILike(a.TailNumber, $"%{search}%") ||
+                    EF.Functions.ILike(a.Model, $"%{search}%") ||
+                    EF.Functions.ILike(a.Manufacturer, $"%{search}%"));
+            }
 
-            }).ToListAsync();
+            int totalItems = await query.CountAsync();
 
-            return aircrafts;
+            var items = await query
+                .OrderBy(a => a.Id)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .Select(a => new AircraftListViewModel
+                {
+                    Id = a.Id,
+                    TailNumber = a.TailNumber,
+                    Model = a.Model,
+                    Manufacturer = a.Manufacturer,
+                    Status = a.Status,
+                    TotalFlightHours = a.TotalFlightHours,
+
+                    MaintenanceCount = a.WorkOrders
+                        .SelectMany(w => w.MaintenanceRecords)
+                        .Count(),
+
+                    WorkOrderCount = a.WorkOrders.Count(),
+
+                    AlertCount = a.Alerts.Count(),
+
+                    IsDeleted = a.IsDeleted
+                })
+                .ToListAsync();
+
+            return new PagedResult<AircraftListViewModel>
+            {
+                Items = items,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize,
+                TotalItems = totalItems
+            };
         }
 
 
@@ -60,8 +98,7 @@ namespace AircraftMRO.Services
             {
                 AircraftDetailsViewModel? aircraftDetails =
                     await _context.Aircrafts
-                        .AsNoTracking() // EF Core does NOT track returned entities in memory
-                        .AsSplitQuery() // Splits one massive query into multiple smaller queries
+                        .AsNoTracking() // Read no need for tracking of changes, less memory usage and faster queries 
                         .Where(a => a.Id == id)
                         .Select(a => new AircraftDetailsViewModel
                         {
@@ -69,12 +106,14 @@ namespace AircraftMRO.Services
 
                             TailNumber = a.TailNumber,
 
-                            LightMaintenanceRecords = a.MaintenanceRecords
+                            LightMaintenanceRecords = a.WorkOrders
+                                .SelectMany(w => w.MaintenanceRecords)
                                 .OrderByDescending(m => m.Id)
                                 .Take(30)
                                 .Select(m => new MaintenanceLightViewModel
                                 {
                                     Id = m.Id,
+                                    WorkOrderId = m.WorkOrderId,
                                     Type = m.Type,
                                     Status = m.Status
                                 })
@@ -100,7 +139,7 @@ namespace AircraftMRO.Services
                                     Severity = l.Severity,
                                     IsResolved = l.IsResolved
                                 })
-                                .ToList()
+                                .ToList(),
                         })
                         .FirstOrDefaultAsync();
 

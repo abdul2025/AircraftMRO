@@ -40,7 +40,11 @@ body {
     --btn-based-color: #fff;
     --page-background: #fefeff;
     --table-header-bg-based: #e1e1e3;
-
+    --filter-bg: #e1e1e3;
+}
+.based-filter-bg {
+  background-color: var(--filter-bg);
+  color: var(--based-color);
 }
 
 /* Background */
@@ -71,4 +75,30 @@ body {
 
 .card-bg-header {
     background-color: var(--table-header-bg-based) !important;
+}
+
+
+
+
+
+/* pagination */
+.custom-pagination .page-link {
+    color: var(--based-color);
+    background-color: var(--page-background);
+}
+
+.custom-pagination .page-link:hover {
+    color: var(--based-text);
+    background-color: var(--based-color-hover);
+}
+
+.custom-pagination .page-item.active .page-link {
+    color: var(--based-text);
+    background-color: var(--based-color);
+}
+
+.custom-pagination .page-item.disabled .page-link {
+    color: #9aa0af;
+    background-color: #f1f2f6;
+    border-color: #dcdde1;
 }

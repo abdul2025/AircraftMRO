@@ -9,10 +9,11 @@ namespace AircraftMRO.Models.ViewModels.MaintenanceRecord
     public class MaintenanceLightViewModel
     {
         public int Id { get; set; }
+        public int WorkOrderId { get; set; }
 
         public MaintenanceType Type { get; set; }
         public MaintenanceStatus Status { get; set; } = MaintenanceStatus.Scheduled;
 
-        
+
     }
 }

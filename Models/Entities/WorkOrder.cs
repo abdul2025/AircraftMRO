@@ -25,5 +25,9 @@ namespace AircraftMRO.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? CompletedAt { get; set; }
+
+        // One WorkOrder -> Many MaintenanceRecords
+        public ICollection<MaintenanceRecord> MaintenanceRecords { get; set; }
+            = new List<MaintenanceRecord>();
     }
 }

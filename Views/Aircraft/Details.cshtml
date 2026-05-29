@@ -13,7 +13,7 @@
         <div>
 
             <h2 class="fw-bold based-text mb-1">
-               Aircraft Tail: @Model.TailNumber
+                Aircraft Tail: @Model.TailNumber
             </h2>
 
             <p class="text-muted mb-0 small">
@@ -71,15 +71,16 @@
 
                     @if (Model.LightMaintenanceRecords.Any())
                     {
-                        <div class="table-responsive overflow-auto"
-     style="max-height: 570px;"">
+                        <div class="table-responsive overflow-auto" style="max-height: 570px;"">
 
-                            <table class="table table-sm table-hover align-middle mb-0 small">
+                            <table class=" table table-sm table-hover align-middle mb-0 small">
 
-                                <thead class="table-light position-sticky top-0"  style="--bs-table-bg: #e9f4ff">
+                                <thead class="table-light position-sticky top-0" style="--bs-table-bg: #e9f4ff">
 
                                     <tr>
-
+                                        <th class="text-muted fw-semibold">
+                                            WO#
+                                        </th>
                                         <th class="text-muted fw-semibold">
                                             Type
                                         </th>
@@ -101,7 +102,14 @@
                                     @foreach (var item in Model.LightMaintenanceRecords)
                                     {
                                         <tr>
-
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    <a asp-controller="WorkOrders" asp-action="Details"
+                                                       asp-route-id="@item.WorkOrderId">
+                                                        WO-@item.WorkOrderId
+                                                    </a>
+                                                </span>
+                                            </td>
                                             <td class="fw-semibold">
                                                 @item.Type
                                             </td>
@@ -186,12 +194,11 @@
 
                     @if (Model.LightWorkOrders.Any())
                     {
-                        <div class="table-responsive overflow-auto"
-     style="max-height: 570px;"">
+                        <div class="table-responsive overflow-auto" style="max-height: 570px;"">
 
-                            <table class="table table-sm table-hover align-middle mb-0 small ">
+                            <table class=" table table-sm table-hover align-middle mb-0 small ">
 
-                                <thead class="table-light position-sticky top-0"  style="--bs-table-bg: #e9f4ff">
+                                <thead class=" table-light position-sticky top-0" style="--bs-table-bg: #e9f4ff">
 
                                     <tr>
 
@@ -300,10 +307,9 @@
                 <div class="card-body p-0">
                     @if (Model.LightAlerts.Any())
                     {
-                        <div class="table-responsive overflow-auto"
-     style="max-height: 570px;"">
+                        <div class="table-responsive overflow-auto" style="max-height: 570px;"">
 
-                            <table class="table table-sm table-hover align-middle mb-0 small">
+                            <table class=" table table-sm table-hover align-middle mb-0 small">
 
                                 <thead class="table-light position-sticky top-0" style="--bs-table-bg: #e9f4ff">
 

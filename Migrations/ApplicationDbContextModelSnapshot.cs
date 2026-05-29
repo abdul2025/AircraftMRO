@@ -102,9 +102,6 @@ namespace AircraftMRO.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AircraftId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("CompletedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -121,9 +118,12 @@ namespace AircraftMRO.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
+                    b.Property<int>("WorkOrderId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("AircraftId");
+                    b.HasIndex("WorkOrderId");
 
                     b.ToTable("MaintenanceRecords");
                 });
@@ -176,13 +176,13 @@ namespace AircraftMRO.Migrations
 
             modelBuilder.Entity("AircraftMRO.Models.MaintenanceRecord", b =>
                 {
-                    b.HasOne("AircraftMRO.Models.Aircraft", "Aircraft")
+                    b.HasOne("AircraftMRO.Models.WorkOrder", "WorkOrder")
                         .WithMany("MaintenanceRecords")
-                        .HasForeignKey("AircraftId")
+                        .HasForeignKey("WorkOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Aircraft");
+                    b.Navigation("WorkOrder");
                 });
 
             modelBuilder.Entity("AircraftMRO.Models.WorkOrder", b =>
@@ -200,9 +200,12 @@ namespace AircraftMRO.Migrations
                 {
                     b.Navigation("Alerts");
 
-                    b.Navigation("MaintenanceRecords");
-
                     b.Navigation("WorkOrders");
+                });
+
+            modelBuilder.Entity("AircraftMRO.Models.WorkOrder", b =>
+                {
+                    b.Navigation("MaintenanceRecords");
                 });
 #pragma warning restore 612, 618
         }

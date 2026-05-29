@@ -23,5 +23,7 @@ namespace AircraftMRO.Models.ViewModels.WorkOrder
         public DateTime CreatedAt { get; set; }
 
         public DateTime? CompletedAt { get; set; }
+        public int MaintenanceRecordCount { get; set; }
+
     }
 }

@@ -9,10 +9,10 @@ namespace AircraftMRO.Models
         public int Id { get; set; }
 
         [Required]
-        public int AircraftId { get; set; }
+        public int WorkOrderId { get; set; }
 
-        [ForeignKey(nameof(AircraftId))]
-        public Aircraft Aircraft { get; set; } = null!;
+        [ForeignKey(nameof(WorkOrderId))]
+        public WorkOrder WorkOrder { get; set; } = null!;
 
         public MaintenanceType Type { get; set; }
 
@@ -25,5 +25,5 @@ namespace AircraftMRO.Models
 
         [MaxLength(500)]
         public string? Notes { get; set; }
-}
+    }
 }

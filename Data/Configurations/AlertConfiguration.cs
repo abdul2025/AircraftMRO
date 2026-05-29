@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AircraftMRO.Data.Configurations
 {
-    public class AlertConfiguration: IEntityTypeConfiguration<MaintenanceRecord>
+    public class AlertConfiguration : IEntityTypeConfiguration<Alert>
     {
-        public void Configure(EntityTypeBuilder<MaintenanceRecord> builder)
+        public void Configure(EntityTypeBuilder<Alert> builder)
         {
-            builder.HasOne(m => m.Aircraft)
-                .WithMany(a => a.MaintenanceRecords)
-                .HasForeignKey(m => m.AircraftId)
+            builder.HasOne(a => a.Aircraft)
+                .WithMany(a => a.Alerts)
+                .HasForeignKey(a => a.AircraftId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

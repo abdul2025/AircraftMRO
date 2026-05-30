@@ -12,6 +12,7 @@ namespace AircraftMRO.Data.Configurations
                 .WithMany(a => a.WorkOrders)
                 .HasForeignKey(w => w.AircraftId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
         }
     }
 }

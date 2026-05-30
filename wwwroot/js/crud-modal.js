@@ -25,15 +25,22 @@ async function openCrudModal(url) {
 
     document.getElementById('crudModalContent').innerHTML = html;
 
-    // Initialize Tom Select only if present
-    const aircraftSelect = document.getElementById('aircraftSelect');
+    // Initialize TomSelect for any select marked with data-tom-select
+    document
+        .querySelectorAll('#crudModalContent select[data-tom-select]')
+        .forEach(select => {
 
-    if (aircraftSelect && !aircraftSelect.tomselect) {
-        new TomSelect(aircraftSelect, {
-            create: false,
-            placeholder: 'Search aircraft...'
+            if (!select.tomselect) {
+
+                new TomSelect(select, {
+                    create: false,
+                    placeholder:
+                        select.dataset.placeholder || 'Search...'
+                });
+
+            }
+
         });
-    }
 
     initializeValidation();
 

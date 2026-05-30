@@ -30,7 +30,11 @@
                 Aircraft
             </label>
 
-            <select asp-for="AircraftId" asp-items="Model.Aircrafts" class="form-select" id="aircraftSelect">
+            <select asp-for="AircraftId"
+                    asp-items="Model.Aircrafts"
+                    class="form-select"
+                    data-tom-select
+                    data-placeholder="Search aircraft...">
 
                 <option value="">
                     Select Aircraft

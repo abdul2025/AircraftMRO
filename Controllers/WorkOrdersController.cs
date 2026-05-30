@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AircraftMRO.Common.Filters;
+using AircraftMRO.Common.Results;
 using AircraftMRO.Models;
 using AircraftMRO.Models.Enums;
 using AircraftMRO.Models.ViewModels.WorkOrder;
@@ -33,6 +34,18 @@ namespace AircraftMRO.Controllers
             var workOrders = await _workOrderService.GetWorkOrdersAsync(filter);
 
             return View(workOrders);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var result = await _workOrderService.GetDetailsAsync(id);
+
+            if (!result.Success)
+            {
+                return NotFound();
+            }
+
+            return View(result.Data);
         }
 
         public async Task<IActionResult> Create()
@@ -76,14 +89,68 @@ namespace AircraftMRO.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            WorkOrderEditViewModel model = await _workOrderService.GetEdutViewAsync(id);
+            ServiceResult<WorkOrderEditViewModel> result = await _workOrderService.GetEditViewAsync(id);
 
-            if (model == null)
+            if (!result.Success)
             {
                 return NotFound();
             }
 
-            return PartialView("_Edit", model);
+            return PartialView("_Edit", result.Data);
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(WorkOrderEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_Edit", model);
+            }
+            WorkOrder? workOrder = await _repository.GetByIdAsync(model.Id);
+
+            if (workOrder == null)
+            {
+                return NotFound();
+            }
+
+            workOrder.Description = model.Description;
+            workOrder.Priority = model.Priority;
+
+            await _repository.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _workOrderService.GetDeleteViewAsync(id);
+
+            if (!result.Success)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_Delete", result.Data);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            WorkOrder? workOrder = await _repository.GetByIdAsync(id);
+
+            if (workOrder == null)
+                return NotFound();
+
+            await _repository.DeleteAsync(workOrder);
+
+            await _repository.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

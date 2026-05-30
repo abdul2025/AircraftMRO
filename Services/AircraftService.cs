@@ -158,8 +158,13 @@ namespace AircraftMRO.Services
                     Data = aircraftDetails
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    "Failed to load aircraft details.",
+                    ex,
+                    new { AircraftId = id });
+
                 return new ServiceResult<AircraftDetailsViewModel>
                 {
                     Success = false,
@@ -183,6 +188,14 @@ namespace AircraftMRO.Services
 
                 await _repository.SaveChangesAsync();
 
+                _logger.LogInfo(
+                    "Aircraft created successfully.",
+                    new
+                    {
+                        aircraft.Id,
+                        aircraft.TailNumber
+                    });
+
                 return new ServiceResult<Aircraft>
                 {
                     Success = true,
@@ -195,6 +208,13 @@ namespace AircraftMRO.Services
                 {
                     if (postgresEx.SqlState == PostgresErrorCodes.UniqueViolation)
                     {
+                        _logger.LogWarning(
+                            "Attempted to create aircraft with duplicate tail number.",
+                            new
+                            {
+                                viewModel.TailNumber
+                            });
+
                         return new ServiceResult<Aircraft>
                         {
                             Success = false,
@@ -203,14 +223,33 @@ namespace AircraftMRO.Services
                     }
                 }
 
+                _logger.LogError(
+                    "Database update failed while creating aircraft.",
+                    ex,
+                    new
+                    {
+                        viewModel.TailNumber,
+                        viewModel.Model,
+                        viewModel.Manufacturer
+                    });
+
                 return new ServiceResult<Aircraft>
                 {
                     Success = false,
                     ErrorMessage = "Database update failed."
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    "Unexpected error while creating aircraft.",
+                    ex,
+                    new
+                    {
+                        viewModel.TailNumber,
+                        viewModel.Model,
+                        viewModel.Manufacturer
+                    });
 
                 return new ServiceResult<Aircraft>
                 {

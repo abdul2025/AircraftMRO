@@ -1,8 +1,430 @@
+@using AircraftMRO.Common.Pagination
+@using AircraftMRO.Models.Enums
+@using AircraftMRO.Models.ViewModels.MaintenanceRecord
+
+@model PagedResult<MaintenanceListViewModel>
+
 @{
-    ViewData["Title"] = "Maintenance";
+    ViewData["Title"] = "Maintenance Records";
 }
 
+<div class="container-fluid px-0">
 
-<div class="container py-5">
-    <h1>Maintenance</h1>
+    <!-- Header -->
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 based-text">
+
+    <div>
+
+        <h3 class="fw-bold mb-1">
+            Maintenance Records
+        </h3>
+
+        <p class="text-muted mb-0">
+            Track and manage all maintenance activities.
+        </p>
+
+    </div>
+
+    <button class="btn btn-based rounded-pill px-4"
+            onclick="openCrudModal('/Maintenance/Create')">
+
+        <i class="bi bi-plus-circle me-2"></i>
+        Add Maintenance Record
+
+    </button>
+
+</div>
+
+    <!-- Filters -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-2 based-filter-bg">
+
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label fw-semibold">
+                            Search
+                        </label>
+
+                        <input type="text"
+                               name="Search"
+                               value="@Context.Request.Query["Search"]"
+                               class="form-control"
+                               placeholder="Aircraft tail number or notes" />
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label class="form-label fw-semibold">
+                            Page Size
+                        </label>
+
+                        <select name="PageSize"
+                                class="form-select">
+
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <button type="submit"
+                                class="btn btn-based px-4">
+
+                            <i class="bi bi-search me-2"></i>
+                            Filter
+
+                        </button>
+
+                        <a asp-action="Index"
+                           class="btn btn-light border ms-2">
+
+                            Reset
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Table -->
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body p-2 p-md-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0 small">
+
+                    <thead class="table-light text-center based-bg-table-header">
+
+                        <tr>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Record
+                            </th>
+                            
+                            <th class="py-2 based-text">
+                                Notes
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Work Order
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Aircraft
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Type
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Status
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Scheduled
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Completed
+                            </th>
+
+                            <th class="py-2 based-text text-nowrap">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model.Items.Any())
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr class="text-center align-middle">
+
+                                    <!-- Record -->
+                                    
+
+                                    <td class="py-2 text-nowrap">
+
+                                        <span class="badge text-bg-secondary">
+                                            MR-@item.Id
+                                        </span>
+
+                                    </td>
+                                    <td class="py-2">
+
+                                        @if (string.IsNullOrWhiteSpace(item.Notes))
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                        else
+                                        {
+                                            @(item.Notes.Length > 40
+                                                ? item.Notes[..40] + "..."
+                                                : item.Notes)
+                                        }
+
+                                    </td>
+
+                                    <!-- Work Order -->
+
+                                    <td class="py-2 text-nowrap">
+
+                                        <span class="badge text-bg-light border">
+                                            WO-@item.WorkOrderId
+                                        </span>
+
+                                    </td>
+
+                                    <!-- Aircraft -->
+
+                                    <td class="py-2 text-nowrap fw-semibold">
+                                        @item.AircraftTailNumber
+                                    </td>
+
+                                    <!-- Type -->
+
+                                    <td class="py-2 text-nowrap">
+                                        @item.Type
+                                    </td>
+
+                                    <!-- Status -->
+
+                                    <td class="py-2 text-nowrap">
+
+                                        @if (item.Status.ToString() == "Completed")
+                                        {
+                                            <span class="badge text-bg-success fw-normal">
+                                                @item.Status
+                                            </span>
+                                        }
+                                        else if (item.Status.ToString() == "InProgress")
+                                        {
+                                            <span class="badge text-bg-primary fw-normal">
+                                                In Progress
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-warning fw-normal">
+                                                @item.Status
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- Scheduled -->
+
+                                    <td class="py-2 text-nowrap">
+                                        @item.ScheduledDate.ToString("dd MMM yyyy hh:mm tt")
+                                    </td>
+
+                                    <!-- Completed -->
+
+                                    <td class="py-2 text-nowrap">
+                                        @item.CompletedDate?.ToString("dd MMM yyyy hh:mm tt")
+                                    </td>
+
+                                    
+
+                                    <!-- Actions -->
+
+                                    <td class="py-2 text-nowrap">
+
+                                        <div class="d-flex flex-wrap justify-content-center gap-2">
+
+                                            <!-- Completed -->
+
+                                           @if (item.Status == MaintenanceStatus.Completed)
+                                            {
+                                                <button class="btn btn-sm btn-outline-success"
+                                                        disabled
+                                                        title="Already completed">
+
+                                                    <i class="bi bi-check-circle-fill"></i>
+
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-outline-success"
+                                                        onclick="openCrudModal('/Maintenance/Complete/@item.Id')"
+                                                        title="Mark as Completed">
+
+                                                    <i class="bi bi-check-circle"></i>
+
+                                                </button>
+                                            }
+
+
+                                            <!-- Edit -->
+
+                                            @if (item.Status == MaintenanceStatus.Completed)
+                                            {
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        disabled
+                                                        title="Completed records cannot be edited">
+
+                                                    <i class="bi bi-pencil-fill"></i>
+
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        onclick="openCrudModal('/Maintenance/Edit/@item.Id')"
+                                                        title="Edit Maintenance Record">
+
+                                                    <i class="bi bi-pencil"></i>
+
+                                                </button>
+                                            }
+
+                                            <!-- Delete -->
+
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="openCrudModal('/Maintenance/Delete/@item.Id')">
+
+                                                <i class="bi bi-trash"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="9" class="text-center py-5">
+
+                                    <div class="py-4">
+
+                                        <div class="mb-3">
+                                            <i class="bi bi-tools fs-1 text-muted"></i>
+                                        </div>
+
+                                        <h5 class="fw-semibold mb-2">
+                                            No Maintenance Records Found
+                                        </h5>
+
+                                        <p class="text-muted mb-4">
+                                            No maintenance records available.
+                                        </p>
+
+                                        <button class="btn btn-dark rounded-pill px-4"
+                                                onclick="openCrudModal('/Maintenance/Create')">
+
+                                            <i class="bi bi-plus-circle me-2"></i>
+                                            Add Maintenance Record
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @* <!-- Pagination --> *@
+
+    @{
+        int startPage = Math.Max(1, Model.PageNumber - 2);
+        int endPage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
+    }
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-3 mb-5">
+
+            <ul class="pagination justify-content-center custom-pagination">
+
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+
+                    <a class="page-link"
+                       asp-route-PageNumber="@(Model.PageNumber - 1)"
+                       asp-route-Search="@Context.Request.Query["Search"]"
+                       asp-route-PageSize="@Model.PageSize">
+
+                        Previous
+
+                    </a>
+
+                </li>
+
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+
+                        <a class="page-link"
+                           asp-route-PageNumber="@i"
+                           asp-route-Search="@Context.Request.Query["Search"]"
+                           asp-route-PageSize="@Model.PageSize">
+
+                            @i
+
+                        </a>
+
+                    </li>
+                }
+
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+
+                    <a class="page-link"
+                       asp-route-PageNumber="@(Model.PageNumber + 1)"
+                       asp-route-Search="@Context.Request.Query["Search"]"
+                       asp-route-PageSize="@Model.PageSize">
+
+                        Next
+
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </nav>
+    }
+
 </div>

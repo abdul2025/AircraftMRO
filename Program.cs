@@ -40,6 +40,7 @@ builder.Services.AddScoped<IAircraftService, AircraftService>();
 // This to handle the generic assigning of model as per each initiate for the BaseRepo
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
+builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 // END New Registry of any services
 
 

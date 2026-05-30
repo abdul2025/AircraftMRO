@@ -1,0 +1,328 @@
+@using AircraftMRO.Models.Enums
+@model AircraftMRO.Models.ViewModels.WorkOrder.WorkOrderDetailsViewModel
+
+@{
+    ViewData["Title"] = "Work Order Details";
+
+    string priorityClass = Model.Priority switch
+    {
+        WorkOrderPriority.Low => "text-bg-success",
+        WorkOrderPriority.Medium => "text-bg-info",
+        WorkOrderPriority.High => "text-bg-warning",
+        WorkOrderPriority.Critical => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+
+    string statusClass = Model.Status switch
+    {
+        WorkOrderStatus.Open => "text-bg-warning",
+        WorkOrderStatus.InProgress => "text-bg-primary",
+        WorkOrderStatus.Closed => "text-bg-success",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="container-fluid px-0">
+
+    <!-- Header -->
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+
+        <div>
+
+            <h2 class="fw-bold based-text mb-1">
+                Work Order #@Model.Id
+            </h2>
+
+            <p class="text-muted mb-0 small">
+                Aircraft @Model.AircraftTailNumber
+            </p>
+
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+
+                <i class="bi bi-arrow-left me-2"></i>
+                Back
+
+            </a>
+            <button type="button" class="btn btn-outline-primary rounded-pill px-4"
+                    onclick="openCrudModal('/WorkOrders/Edit/@Model.Id')">
+
+                <i class="bi bi-pencil-square me-2"></i>
+                Edit
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Work Order Information -->
+
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+
+        <div class="card-header card-bg-header border-0 py-3 px-3">
+
+            <div>
+
+                <h6 class="fw-semibold based-text mb-1">
+                    Work Order Information
+                </h6>
+
+                <small class="text-muted">
+                    Overview and current work order status
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <div class="col-md-4">
+
+                    <small class="text-muted d-block mb-1">
+                        Aircraft
+                    </small>
+
+                    <span class="fw-semibold">
+                        @Model.AircraftTailNumber
+                    </span>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <small class="text-muted d-block mb-1">
+                        Priority
+                    </small>
+
+                    <span class="badge @priorityClass fw-normal">
+                        @Model.Priority
+                    </span>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <small class="text-muted d-block mb-1">
+                        Status
+                    </small>
+
+                    <span class="badge @statusClass fw-normal">
+                        @Model.Status
+                    </span>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <small class="text-muted d-block mb-1">
+                        Created At
+                    </small>
+
+                    <span class="fw-semibold">
+                        @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")
+                    </span>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <small class="text-muted d-block mb-1">
+                        Completed At
+                    </small>
+
+                    <span class="fw-semibold">
+                        @(Model.CompletedAt?.ToString("dd MMM yyyy HH:mm") ?? "-")
+                    </span>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <small class="text-muted d-block mb-1">
+                        Maintenance Records
+                    </small>
+
+                    <span class="badge bg-light text-dark border fw-normal">
+                        @Model.MaintenanceRecordCount
+                    </span>
+
+                </div>
+
+                <div class="col-12">
+
+                    <small class="text-muted d-block mb-1">
+                        Description
+                    </small>
+
+                    <p class="mb-0">
+                        @Model.Description
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Maintenance Records -->
+
+    <div class="card border-0 shadow-sm rounded-3">
+
+        <div class="card-header card-bg-header border-0 py-3 px-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h6 class="fw-semibold based-text mb-1">
+                        Maintenance Records
+                    </h6>
+
+                    <small class="text-muted">
+                        Related maintenance activity
+                    </small>
+
+                </div>
+
+                <span class="badge bg-light text-dark border fw-normal">
+                    @Model.MaintenanceRecordCount
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model.MaintenanceRecords.Any())
+            {
+                <div class="table-responsive overflow-auto" style="max-height: 250px;">
+
+                    <table class="table table-sm table-hover align-middle mb-0 small">
+
+                        <thead class="table-light position-sticky top-0" style="--bs-table-bg:#e9f4ff; z-index:1;">
+                            <tr>
+
+                                <th class="text-muted fw-semibold">
+                                    ID
+                                </th>
+
+                                <th class="text-muted fw-semibold">
+                                    Type
+                                </th>
+
+                                <th class="text-muted fw-semibold">
+                                    Status
+                                </th>
+
+                                <th class="text-muted fw-semibold">
+                                    Scheduled
+                                </th>
+
+                                <th class="text-muted fw-semibold">
+                                    Completed
+                                </th>
+
+                                <th class="text-muted fw-semibold">
+                                    Notes
+                                </th>
+
+                                <th class="text-end text-muted fw-semibold">
+                                    View
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var record in Model.MaintenanceRecords)
+                            {
+                                <tr>
+
+                                    <td>
+
+                                        <span class="badge bg-secondary">
+                                            MR-@record.Id
+                                        </span>
+
+                                    </td>
+
+                                    <td class="fw-semibold">
+                                        @record.Type
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge bg-light text-dark border fw-normal">
+                                            @record.Status
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+                                        @record.ScheduledDate.ToString("dd MMM yyyy")
+                                    </td>
+
+                                    <td>
+                                        @(record.CompletedDate?.ToString("dd MMM yyyy") ?? "-")
+                                    </td>
+
+                                    <td style="max-width:300px;">
+                                        <div class="text-truncate">
+                                            @(string.IsNullOrWhiteSpace(record.Notes)
+                                                ? "-"
+                                                : record.Notes)
+                                        </div>
+                                    </td>
+
+                                    <td class="text-end">
+
+                                        <a asp-controller="MaintenanceRecord" asp-action="Details" asp-route-id="@record.Id"
+                                           class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex align-items-center justify-content-center"
+                                           style="width:32px;height:32px;">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+
+                    <i class="bi bi-tools fs-3 text-muted mb-3 d-block"></i>
+
+                    <p class="text-muted small mb-0">
+                        No maintenance records available.
+                    </p>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

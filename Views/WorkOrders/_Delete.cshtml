@@ -1,5 +1,5 @@
-@using AircraftMRO.Models.ViewModels.Aircraft
-@model AircraftDeleteViewModel
+@using AircraftMRO.Models.ViewModels.WorkOrder
+@model WorkOrderDeleteViewModel
 
 <form asp-action="DeleteConfirmed" method="post">
 
@@ -10,7 +10,7 @@
     <div class="modal-header">
 
         <h5 class="modal-title fw-bold text-danger">
-            Delete Aircraft
+            Delete Work Order
         </h5>
 
         <button type="button"
@@ -31,19 +31,17 @@
             </h5>
 
             <p class="text-muted mb-0">
-
-                You are about to delete:
-
+                You are about to delete this work order:
             </p>
 
             <div class="mt-3">
 
                 <div class="fw-bold">
-                    @Model.TailNumber
+                    @Model.AircraftTailNumber
                 </div>
 
-                <small class="text-muted">
-                    @Model.Model
+                <small class="text-muted d-block mt-1">
+                    @Model.Description
                 </small>
 
             </div>
@@ -65,7 +63,7 @@
         <button type="submit"
                 class="btn btn-danger">
 
-            Delete Aircraft
+            Delete Work Order
 
         </button>
 

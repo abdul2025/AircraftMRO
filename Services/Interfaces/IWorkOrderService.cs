@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Pagination;
+using AircraftMRO.Common.Results;
 using AircraftMRO.Models.ViewModels.WorkOrder;
 
 namespace AircraftMRO.Services.Interfaces
@@ -12,6 +13,9 @@ namespace AircraftMRO.Services.Interfaces
     {
         Task<PagedResult<WorkOrderListViewModel>> GetWorkOrdersAsync(WorkOrderFilter filter);
         Task<WorkOrderCreateViewModel> GetCreateViewAsync();
-        Task<WorkOrderEditViewModel> GetEdutViewAsync(int id);
+        Task<ServiceResult<WorkOrderDetailsViewModel>> GetDetailsAsync(int id);
+        Task<ServiceResult<WorkOrderEditViewModel>> GetEditViewAsync(int id);
+        Task<ServiceResult<WorkOrderDeleteViewModel>> GetDeleteViewAsync(int id);
+        
     }
 }

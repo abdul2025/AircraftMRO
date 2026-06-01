@@ -55,7 +55,6 @@ namespace AircraftMRO.Controllers
             return PartialView("_Create", model);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(WorkOrderCreateViewModel model)
@@ -67,21 +66,19 @@ namespace AircraftMRO.Controllers
                 return PartialView("_Create", model);
             }
 
-            WorkOrder workOrder = new()
+            var result = await _workOrderService.CreateAsync(model);
+
+            if (!result.Success)
             {
-                AircraftId = model.AircraftId,
-                Description = model.Description,
-                Priority = model.Priority,
-                Status = WorkOrderStatus.Open,
-                CreatedAt = DateTime.UtcNow
-            };
+                ModelState.AddModelError(string.Empty,
+                    result.ErrorMessage ?? "Failed to create work order.");
 
-            await _repository.AddAsync(workOrder);
-            await _repository.SaveChangesAsync();
+                model.Aircrafts = (await _workOrderService.GetCreateViewAsync()).Aircrafts;
 
+                return PartialView("_Create", model);
+            }
 
             return RedirectToAction(nameof(Index));
-
         }
 
 
@@ -108,17 +105,17 @@ namespace AircraftMRO.Controllers
             {
                 return PartialView("_Edit", model);
             }
-            WorkOrder? workOrder = await _repository.GetByIdAsync(model.Id);
 
-            if (workOrder == null)
+            ServiceResult<WorkOrder> result = await _workOrderService.EditAsync(model);
+
+            if (!result.Success)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+
+                return PartialView("_Edit", model);
             }
 
-            workOrder.Description = model.Description;
-            workOrder.Priority = model.Priority;
-
-            await _repository.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Work order updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -140,14 +137,12 @@ namespace AircraftMRO.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            WorkOrder? workOrder = await _repository.GetByIdAsync(id);
+            var result = await _workOrderService.DeleteAsync(id);
 
-            if (workOrder == null)
+            if (!result.Success)
+            {
                 return NotFound();
-
-            await _repository.DeleteAsync(workOrder);
-
-            await _repository.SaveChangesAsync();
+            }
 
             return RedirectToAction(nameof(Index));
         }

@@ -8,6 +8,9 @@ namespace AircraftMRO.Models
     {
         public int Id { get; set; }
 
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+
         [Required]
         public int AircraftId { get; set; }
 
@@ -16,12 +19,10 @@ namespace AircraftMRO.Models
 
         [Required]
         [MaxLength(300)]
-        public string Message { get; set; } = string.Empty;
-
         public AlertSeverity Severity { get; set; } = AlertSeverity.Warning;
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public bool IsResolved { get; set; } = false;
+        public DateTime? ResolvedAt { get; set; }
+        public int? WorkOrderId { get; set; }
+        public bool NotificationSent { get; set; }
     }
 }

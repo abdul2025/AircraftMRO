@@ -6,6 +6,9 @@ using Serilog;
 using AircraftMRO.Services;
 using AircraftMRO.Services.Interfaces;
 using AircraftMRO.Repositories;
+using Hangfire;
+using Hangfire.PostgreSql;
+using AircraftMRO.BackgroundJobs;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -30,6 +33,18 @@ builder.Host.UseSerilog();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+// Hangfire
+builder.Services.AddHangfire(config =>
+{
+    config.UsePostgreSqlStorage(options =>
+        options.UseNpgsqlConnection(
+            builder.Configuration.GetConnectionString("DefaultConnection")));
+});
+builder.Services.AddHangfireServer();
+
+
 // MVC 
 builder.Services.AddControllersWithViews();
 
@@ -41,6 +56,10 @@ builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
+builder.Services.AddScoped<IAircraftStatusService, AircraftStatusService>();
+
+builder.Services.AddScoped<AlertJobsService>();
+
 // END New Registry of any services
 
 
@@ -51,6 +70,21 @@ builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 
 
 var app = builder.Build();
+
+
+// Register recurring jobs
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager =
+        scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
+    recurringJobManager.AddOrUpdate<AlertJobsService>(
+        "alert-checks",
+        service => service.RunAlertChecks(),
+        Cron.MinuteInterval(30),
+        new RecurringJobOptions()
+    );
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -72,6 +106,10 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+
+
+app.UseHangfireDashboard("/hangfire");
 
 app.MapControllerRoute(
     name: "default",

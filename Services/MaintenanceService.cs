@@ -18,14 +18,16 @@ namespace AircraftMRO.Services
         private readonly ApplicationDbContext _context;
         private readonly IAppLogger _logger;
         private readonly IBaseRepository<MaintenanceRecord> _repository;
+        private readonly IAircraftStatusService _aircraftStatusService;
 
 
 
-        public MaintenanceService(ApplicationDbContext context, IAppLogger logger, IBaseRepository<MaintenanceRecord> repository)
+        public MaintenanceService(ApplicationDbContext context, IAppLogger logger, IBaseRepository<MaintenanceRecord> repository, IAircraftStatusService aircraftStatusService)
         {
             _context = context;
             _logger = logger;
             _repository = repository;
+            _aircraftStatusService = aircraftStatusService;
         }
 
         public async Task<PagedResult<MaintenanceListViewModel>> GetMaintenanceRecordsAsync(MaintenanceFilter filter)
@@ -38,9 +40,13 @@ namespace AircraftMRO.Services
             {
                 string search = filter.Search.Trim();
 
-                query = query.Where(m => (m.Notes != null &&
-                     EF.Functions.ILike(m.Notes, $"%{search}%")) ||
-                     EF.Functions.ILike(m.WorkOrder.Aircraft.TailNumber, $"%{search}%"));
+                bool isIdSearch = int.TryParse(search, out int maintenanceId);
+
+                query = query.Where(m =>
+                    (isIdSearch && m.Id == maintenanceId) ||
+                    (m.Notes != null &&
+                    EF.Functions.ILike(m.Notes, $"%{search}%")) ||
+                    EF.Functions.ILike(m.WorkOrder.Aircraft.TailNumber, $"%{search}%"));
             }
 
             int totalItems = await query.CountAsync();
@@ -137,6 +143,7 @@ namespace AircraftMRO.Services
                 };
 
                 await _repository.AddAsync(maintenanceRecord);
+                await RecalculateWorkOrderStatusAsync(maintenanceRecord.WorkOrderId);
 
                 await _repository.SaveChangesAsync();
 
@@ -227,8 +234,7 @@ namespace AircraftMRO.Services
             return viewModel;
         }
 
-        public async Task<ServiceResult<MaintenanceRecord>> UpdateMaintenanceRecordAsync(
-            MaintenanceEditViewModel viewModel)
+        public async Task<ServiceResult<MaintenanceRecord>> UpdateMaintenanceRecordAsync(MaintenanceEditViewModel viewModel)
         {
             try
             {
@@ -455,11 +461,14 @@ namespace AircraftMRO.Services
         }
 
 
-
+        // Check if All MaintenanceRecords under the required workorder is complated and update the workorder STATUS as well the Aircraft Status
         private async Task RecalculateWorkOrderStatusAsync(int workOrderId)
         {
+            // The WorkOrder has one Aircraft but Aircraft has Many workOrder required to use ThenInclude()
             WorkOrder? workOrder = await _context.WorkOrders
                 .Include(w => w.MaintenanceRecords)
+                .Include(w => w.Aircraft)
+                    .ThenInclude(a => a.WorkOrders) // Aircraft.WorkOrders as self-join on WorkOrders to get all workorder
                 .FirstOrDefaultAsync(w => w.Id == workOrderId);
 
             if (workOrder is null)
@@ -467,24 +476,76 @@ namespace AircraftMRO.Services
                 return;
             }
 
-            bool allCompleted = workOrder.MaintenanceRecords.Any() && workOrder.MaintenanceRecords.All(m =>
+            bool allCompleted =
+                workOrder.MaintenanceRecords.Any() &&
+                workOrder.MaintenanceRecords.All(m =>
                     m.Status == MaintenanceStatus.Completed);
 
             if (allCompleted)
             {
+                _logger.LogInfo(
+                    "Work order automatically closed because all maintenance records are completed.",
+                    new
+                    {
+                        WorkOrderId = workOrder.Id,
+                        NewStatus = WorkOrderStatus.Closed,
+                        MaintenanceRecordCount = workOrder.MaintenanceRecords.Count
+                    });
+
                 workOrder.Status = WorkOrderStatus.Closed;
                 workOrder.CompletedAt = DateTime.UtcNow;
             }
             else if (workOrder.MaintenanceRecords.Any())
             {
+                _logger.LogInfo(
+                    "Work order set to InProgress because maintenance records exist and not all are completed.",
+                    new
+                    {
+                        WorkOrderId = workOrder.Id,
+                        NewStatus = WorkOrderStatus.InProgress,
+                        MaintenanceRecordCount = workOrder.MaintenanceRecords.Count
+                    });
+
                 workOrder.Status = WorkOrderStatus.InProgress;
                 workOrder.CompletedAt = null;
             }
             else
             {
+                _logger.LogInfo(
+                    "Work order set to Open because no maintenance records are associated with it.",
+                    new
+                    {
+                        WorkOrderId = workOrder.Id,
+                        NewStatus = WorkOrderStatus.Open
+                    });
+
                 workOrder.Status = WorkOrderStatus.Open;
+
                 workOrder.CompletedAt = null;
             }
+
+
+            
+            //  Aircraft
+            //  ├── WO-1 Closed
+            //  ├── WO-2 Closed
+            //  └── WO-3 Closed
+            //       => Aircraft Active
+
+            // Aircraft
+            //  ├── WO-1 Closed
+            //  ├── WO-2 Open
+            //  └── WO-3 Closed
+            //       => Aircraft Maintenance
+
+            // Aircraft
+            //  ├── WO-1 Closed
+            //  ├── WO-2 Open and Priority as Critical 
+            //  └── WO-3 Closed
+            //       => Aircraft Grounded
+            _aircraftStatusService.UpdateAircraftStatus(workOrder.Aircraft, workOrder.Aircraft.WorkOrders);
         }
+
+
     }
 }

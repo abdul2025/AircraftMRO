@@ -47,8 +47,11 @@ namespace AircraftMRO.Services
             if (!string.IsNullOrWhiteSpace(filter.Search))
             {
                 string search = filter.Search.Trim();
-                // Search by text input
-                query = query.Where(a => // EF.Functions.ILike PostgreSQL's and Case-insensitive
+
+                bool isIdSearch = int.TryParse(search, out int aircraftId);
+
+                query = query.Where(a =>
+                    (isIdSearch && a.Id == aircraftId) ||
                     EF.Functions.ILike(a.TailNumber, $"%{search}%") ||
                     EF.Functions.ILike(a.Model, $"%{search}%") ||
                     EF.Functions.ILike(a.Manufacturer, $"%{search}%"));
@@ -137,7 +140,6 @@ namespace AircraftMRO.Services
                                 {
                                     Id = l.Id,
                                     Severity = l.Severity,
-                                    IsResolved = l.IsResolved
                                 })
                                 .ToList(),
                         })

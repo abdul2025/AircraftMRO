@@ -53,7 +53,7 @@
                             name="Search"
                             value="@Context.Request.Query["Search"]"
                             class="form-control"
-                            placeholder="Tail number or model" />
+                            placeholder="ID or Tail number or model" />
 
                     </div>
 
@@ -117,6 +117,7 @@
 
                         <tr>
 
+                            <th class="py-2 based-text text-nowrap">ID</th>
                             <th class="py-2 based-text text-nowrap">Aircraft</th>
                             <th class="py-2 based-text text-nowrap">Manufacturer</th>
                             <th class="py-2 based-text text-nowrap">Status</th>
@@ -137,6 +138,9 @@
                         @foreach (AircraftListViewModel item in Model.Items)
                             {
                                 <tr class="text-center align-middle">
+                                    <td class="py-2 based-text text-nowrap">
+                                        @item.Id
+                                    </td>
 
                                     <!-- Aircraft -->
                                     <td class="py-2 based-text text-nowrap">

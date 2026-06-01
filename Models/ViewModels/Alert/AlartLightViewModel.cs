@@ -9,8 +9,9 @@ namespace AircraftMRO.Models.ViewModels.Alert
     public class AlartLightViewModel
     {
         public int Id { get; set; }
+        public AlertSeverity Severity { get; set; }
 
-        public AlertSeverity Severity { get; set; } = AlertSeverity.Warning;
-        public bool IsResolved { get; set; } = false;
+        public bool IsResolved { get; set; }
+
     }
 }

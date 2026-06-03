@@ -2,7 +2,7 @@ using AircraftMRO.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AircraftMRO.Data.Configurations
+namespace AircraftMRO.Infrastructure.Data.Configurations
 {
     public class MaintenanceRecordConfiguration : IEntityTypeConfiguration<MaintenanceRecord>
     {

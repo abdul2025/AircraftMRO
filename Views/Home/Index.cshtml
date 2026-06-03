@@ -18,11 +18,7 @@
             maintenance tracking, work orders, and critical alerts.
         </p>
 
-        <a class="btn btn-lg mt-3 px-4 text-white btn-based "
-           asp-controller="Aircraft"
-           asp-action="Index">
-            Get Started
-        </a>
+
 
     </div>
 
@@ -60,37 +56,6 @@
             </div>
         </div>
 
-        <!-- Maintenance -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body text-center p-4">
-
-                    <div class="mb-3">
-                        <i class="bi bi-tools fs-1 based-text"
-                           ></i>
-                    </div>
-
-                    <h4 class="fw-semibold based-text">
-                        Maintenance
-                    </h4>
-
-                    <p class="text-muted small text-secondary">
-                        Track preventive and corrective
-                        maintenance activities efficiently.
-                    </p>
-
-                    <a asp-controller="Maintenance"
-                       asp-action="Index"
-                       class="btn rounded-pill px-4 text-white btn-based">
-
-                        Open
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
         <!-- Work Orders -->
         <div class="col-md-6 col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
@@ -112,6 +77,37 @@
                     </p>
 
                     <a asp-controller="WorkOrders"
+                       asp-action="Index"
+                       class="btn rounded-pill px-4 text-white btn-based">
+
+                        Open
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="mb-3">
+                        <i class="bi bi-tools fs-1 based-text"
+                           ></i>
+                    </div>
+
+                    <h4 class="fw-semibold based-text">
+                        Maintenance
+                    </h4>
+
+                    <p class="text-muted small text-secondary">
+                        Track preventive and corrective
+                        maintenance activities efficiently.
+                    </p>
+
+                    <a asp-controller="Maintenance"
                        asp-action="Index"
                        class="btn rounded-pill px-4 text-white btn-based">
 

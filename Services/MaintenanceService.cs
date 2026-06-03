@@ -1,7 +1,7 @@
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Results;
-using AircraftMRO.Data;
+using AircraftMRO.Infrastructure.Data;
 using AircraftMRO.Models;
 using AircraftMRO.Models.Enums;
 using AircraftMRO.Models.ViewModels.MaintenanceRecord;
@@ -460,8 +460,42 @@ namespace AircraftMRO.Services
             }
         }
 
+        /*
+        * Work Order Status Rules
+        *
+        * A Work Order status is automatically derived from its associated
+        * Maintenance Records.
+        *
+        * Open
+        *  - No Maintenance Records exist.
+        *
+        * InProgress
+        *  - One or more Maintenance Records exist.
+        *  - At least one Maintenance Record is not completed.
+        *
+        * Closed
+        *  - One or more Maintenance Records exist.
+        *  - All Maintenance Records are completed.
+        *
+        * Examples:
+        *
+        * WO-100
+        * └── No Maintenance Records
+        *      => Open
+        *
+        * WO-100
+        * ├── MR-1 Completed
+        * └── MR-2 Scheduled
+        *      => InProgress
+        *
+        * WO-100
+        * ├── MR-1 Completed
+        * └── MR-2 Completed
+        *      => Closed
+        */
 
-        // Check if All MaintenanceRecords under the required workorder is complated and update the workorder STATUS as well the Aircraft Status
+
+
         private async Task RecalculateWorkOrderStatusAsync(int workOrderId)
         {
             // The WorkOrder has one Aircraft but Aircraft has Many workOrder required to use ThenInclude()
@@ -469,6 +503,8 @@ namespace AircraftMRO.Services
                 .Include(w => w.MaintenanceRecords)
                 .Include(w => w.Aircraft)
                     .ThenInclude(a => a.WorkOrders) // Aircraft.WorkOrders as self-join on WorkOrders to get all workorder
+                .Include(w => w.Aircraft)
+                    .ThenInclude(a => a.Alerts) // Aircraft.Alerts as self-join on Alerts to get all Alerts
                 .FirstOrDefaultAsync(w => w.Id == workOrderId);
 
             if (workOrder is null)
@@ -525,7 +561,7 @@ namespace AircraftMRO.Services
             }
 
 
-            
+
             //  Aircraft
             //  ├── WO-1 Closed
             //  ├── WO-2 Closed
@@ -544,6 +580,10 @@ namespace AircraftMRO.Services
             //  └── WO-3 Closed
             //       => Aircraft Grounded
             _aircraftStatusService.UpdateAircraftStatus(workOrder.Aircraft, workOrder.Aircraft.WorkOrders);
+
+
+
+
         }
 
 

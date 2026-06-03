@@ -1,4 +1,4 @@
-using AircraftMRO.Data;
+using AircraftMRO.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Logging.Interfaces;
 using SharedKernel.Logging.Infrastructure;
@@ -9,6 +9,10 @@ using AircraftMRO.Repositories;
 using Hangfire;
 using Hangfire.PostgreSql;
 using AircraftMRO.BackgroundJobs;
+using Microsoft.AspNetCore.Identity;
+using AircraftMRO.Infrastructure.Identity.Entities;
+using AircraftMRO.Infrastructure.Identity.Seeders;
+using Microsoft.AspNetCore.Authorization;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -64,6 +68,37 @@ builder.Services.AddScoped<AlertJobsService>();
 
 
 
+// IDENTITY
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+
+        options.Password.RequiredLength = 6;
+        options.Password.RequireDigit = true;
+        // options.Password.RequiredUniqueChars = 4;
+        // options.Password.RequireUppercase = true;
+        // options.Password.RequireLowercase = true;
+        // options.Password.RequireNonAlphanumeric = true;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// Redirection
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login"; // Redirect for if not logged in
+    options.AccessDeniedPath = "/Error/403"; // Redirect for lacks permission 
+});
+// Global Authorization
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(policy));
+});
 
 
 
@@ -71,12 +106,17 @@ builder.Services.AddScoped<AlertJobsService>();
 
 var app = builder.Build();
 
+// ROLLS SEEDER
+using (var scope = app.Services.CreateScope())
+{
+    await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
+}
+
 
 // Register recurring jobs
 using (var scope = app.Services.CreateScope())
 {
-    var recurringJobManager =
-        scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
     recurringJobManager.AddOrUpdate<AlertJobsService>(
         "alert-checks",
@@ -90,19 +130,23 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     // Handles unhandled exceptions (500 errors)
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/Error"); // it will look for ErrorController
 
     // Adds HTTP Strict Transport Security (HSTS)
     app.UseHsts();
 }
 
 // Handles status codes like 404, 403, etc.
-app.UseStatusCodePagesWithReExecute("/Error/{0}");
+app.UseStatusCodePagesWithReExecute("/Error/{0}"); // it will look for ErrorController
+
+
 
 
 app.UseHttpsRedirection();
 app.UseRouting();
 
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

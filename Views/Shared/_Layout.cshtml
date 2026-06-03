@@ -24,11 +24,15 @@
         <nav class="navbar navbar bg border-bottom navbar-expand-lg">
             <div class="container-fluid">
 
-                <!-- Sidebar Toggle -->
-                <button class="btn btn-outline-dark me-3" type="button" data-bs-toggle="offcanvas"
-                        data-bs-target="#sidebar" aria-controls="sidebar">
-                    <i class="bi bi-list"></i>
-                </button>
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <!-- Sidebar Toggle -->
+                    <button class="btn btn-outline-dark me-3" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#sidebar" aria-controls="sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                }
+
 
                 <!-- Brand -->
                 <a class="navbar-brand based-text fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
@@ -40,11 +44,47 @@
                 <div class="collapse navbar-collapse" id="topNavbar">
 
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Profile">
-                                <i class="bi bi-person-circle fs-5"></i>
-                            </a>
-                        </li>
+
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item d-flex align-items-center">
+                                <a class="nav-link" asp-controller="Account" asp-action="Profile" title="Profile">
+
+                                    <span class="nav-link">
+                                        <i class="bi bi-person-circle fs-5 me-1"></i>
+                                        @User.Identity?.Name
+                                    </span>
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <form asp-controller="Account" asp-action="Logout" method="post"
+                                      class="d-flex align-items-center h-100">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+
+                                        <i class="bi bi-box-arrow-right"></i>
+
+                                    </button>
+
+                                </form>
+
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">
+
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                    Login
+                                </a>
+                            </li>
+                        }
 
                     </ul>
 
@@ -55,71 +95,111 @@
     </header>
 
     <!-- Sidebar -->
-    <div class="offcanvas offcanvas-start text-bg" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel"
-         style="background-color: #000107;">
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <div class="offcanvas offcanvas-start text-bg" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel"
+             style="background-color: #000107;">
 
-        <!-- Sidebar Header -->
-        <div class="offcanvas-header border-bottom">
+            <!-- Sidebar Header -->
+            <div class="offcanvas-header border-bottom">
 
-            <h5 class="offcanvas-title based-text fw-bold" id="sidebarLabel">
-                AircraftMRO
-            </h5>
+                <h5 class="offcanvas-title based-text fw-bold" id="sidebarLabel">
+                    AircraftMRO
+                </h5>
 
-            <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close">
-            </button>
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close">
+                </button>
 
-        </div>
+            </div>
 
-        <!-- Sidebar Body -->
-        <div class="offcanvas-body d-flex flex-column p-0">
+            <!-- Sidebar Body -->
+            <div class="offcanvas-body d-flex flex-column p-0">
 
-            <ul class="nav nav-pills flex-column p-3">
+                <ul class="nav nav-pills flex-column p-3">
 
-                <li class="nav-item mb-2 fw-bold">
-                    <a asp-controller="Home" asp-action="Index" class="nav-link text-white">
-                        <i class="bi bi-house-door me-2"></i>
-                        Home
-                    </a>
-                </li>
+                    <li class="nav-item mb-2 fw-bold">
+                        <a asp-controller="Home" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-house-door me-2"></i>
+                            Home
+                        </a>
+                    </li>
 
-                <li class="nav-item mb-2 fw-bold">
-                    <a asp-controller="Aircraft" asp-action="Index" class="nav-link text-white">
-                        <i class="bi bi-airplane me-2"></i>
-                        Aircraft
-                    </a>
-                </li>
+                    <li class="nav-item mb-2 fw-bold">
+                        <a asp-controller="Aircraft" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-airplane me-2"></i>
+                            Aircraft
+                        </a>
+                    </li>
 
-                <li class="nav-item mb-2 fw-bold">
-                    <a asp-controller="Maintenance" asp-action="Index" class="nav-link text-white">
-                        <i class="bi bi-tools me-2"></i>
-                        Maintenance
-                    </a>
-                </li>
+                    <li class="nav-item mb-2 fw-bold">
+                        <a asp-controller="Maintenance" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-tools me-2"></i>
+                            Maintenance
+                        </a>
+                    </li>
 
-                <li class="nav-item mb-2 fw-bold">
-                    <a asp-controller="WorkOrders" asp-action="Index" class="nav-link text-white">
-                        <i class="bi bi-clipboard-check me-2 "></i>
-                        Work Orders
-                    </a>
-                </li>
+                    <li class="nav-item mb-2 fw-bold">
+                        <a asp-controller="WorkOrders" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-clipboard-check me-2 "></i>
+                            Work Orders
+                        </a>
+                    </li>
 
-                <li class="nav-item mb-2 fw-bold">
-                    <a asp-controller="Dashboard" asp-action="Index" class="nav-link text-white">
-                        <i class="bi bi-speedometer2 me-2"></i>
-                        Dashboard
-                    </a>
-                </li>
+                    <li class="nav-item mb-2 fw-bold">
+                        <a asp-controller="Dashboard" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-speedometer2 me-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
 
-            </ul>
+                </ul>
 
-            <!-- Bottom Section -->
-            <div class="mt-auto p-3 border-top">
-                <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-dark w-100">
-                    <i class="bi bi-person-circle me-2"></i>
-                </a>
+                <!-- Bottom Section -->
+
+                <div class="mt-auto p-3 border-top border-secondary">
+
+                
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div class="d-grid gap-2">
+
+                            <a asp-controller="Account" asp-action="Profile" class="btn btn-based btn-outline-light">
+
+                                <i class="bi bi-person-circle me-2"></i>
+                                @User.Identity!.Name
+                            </a>
+
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit" class="btn btn-based btn-outline-danger w-100">
+
+                                    <i class="bi bi-box-arrow-right me-2"></i>
+                                    Logout
+
+                                </button>
+
+                            </form>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-based btn-primary w-100">
+
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Login
+
+                        </a>
+                    }
+
+                
+                </div>
+
             </div>
         </div>
-    </div>
+    }
 
     <!-- Main Content -->
     <div class="container-fluid mt-4">

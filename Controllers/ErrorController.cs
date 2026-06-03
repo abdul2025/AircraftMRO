@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AircraftMRO.Controllers
@@ -5,14 +6,16 @@ namespace AircraftMRO.Controllers
     public class ErrorController : Controller
     {
         [Route("Error")]
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)] // to avoid caching in browser, where every time the user visit will get a fresh response not the cached pages/Content
         public IActionResult Error()
         {
             return View("500");
         }
 
         [Route("Error/{statusCode}")]
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)] // to avoid caching in browser, where every time the user visit will get a fresh response not the cached pages/Content
         public IActionResult HttpStatusCodeHandler(int statusCode)
         {
             return statusCode switch

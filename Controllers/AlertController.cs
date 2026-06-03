@@ -1,5 +1,5 @@
 using AircraftMRO.Common.Pagination;
-using AircraftMRO.Data;
+using AircraftMRO.Infrastructure.Data;
 using AircraftMRO.Models.ViewModels.Alert;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -52,8 +52,9 @@ namespace AircraftMRO.Controllers
                     Severity = a.Severity,
                     CreatedAt = a.CreatedAt,
                     IsResolved = a.ResolvedAt != null,
+                    ResolvedAt = a.ResolvedAt,
                     NotificationSent = a.NotificationSent,
-                    WorkOrderId = a.WorkOrderId
+                    WorkOrderIds = a.WorkOrderIds
                 })
                 .ToListAsync();
 

@@ -13,11 +13,12 @@ namespace AircraftMRO.Models.ViewModels.Alert
         public AlertSeverity Severity { get; set; }
 
         public DateTime CreatedAt { get; set; }
+        public DateTime? ResolvedAt { get; set; }
 
         public bool IsResolved { get; set; }
 
         public bool NotificationSent { get; set; }
 
-        public int? WorkOrderId { get; set; }
+        public List<int>? WorkOrderIds { get; set; }
     }
 }

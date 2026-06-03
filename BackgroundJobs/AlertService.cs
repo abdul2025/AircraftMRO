@@ -1,4 +1,4 @@
-using AircraftMRO.Data;
+using AircraftMRO.Infrastructure.Data;
 using AircraftMRO.Models;
 using AircraftMRO.Models.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +11,7 @@ namespace AircraftMRO.BackgroundJobs
         private readonly ApplicationDbContext _context;
         private readonly IAppLogger _logger;
 
-        public AlertJobsService(
-            ApplicationDbContext context,
-            IAppLogger logger)
+        public AlertJobsService(ApplicationDbContext context, IAppLogger logger)
         {
             _context = context;
             _logger = logger;
@@ -44,40 +42,52 @@ namespace AircraftMRO.BackgroundJobs
         {
             _logger.LogInfo("Checking grounded aircraft alerts.");
 
-            var groundedAircraft = await _context.Aircrafts
-                .Where(a => a.Status == AircraftStatus.Grounded)
-                .ToListAsync();
+        var groundedAircraft = await _context.Aircrafts
+            .Where(a => a.Status == AircraftStatus.Grounded)
+            .Select(a => new
+            {
+                Aircraft = a,
+                CriticalWorkOrderIds = a.WorkOrders
+                    .Where(w =>
+                        w.Priority == WorkOrderPriority.Critical &&
+                        (w.Status == WorkOrderStatus.Open ||
+                        w.Status == WorkOrderStatus.InProgress))
+                    .Select(w => w.Id)
+                    .ToList()
+            })
+            .ToListAsync();
 
             int createdAlerts = 0;
 
-            foreach (var aircraft in groundedAircraft)
+            foreach (var item in groundedAircraft)
             {
                 bool alertExists = await _context.Alerts.AnyAsync(a =>
-                    a.AircraftId == aircraft.Id &&
+                    a.AircraftId == item.Aircraft.Id &&
                     !a.ResolvedAt.HasValue &&
                     a.Title == "Aircraft Grounded");
 
                 if (alertExists)
                 {
                     _logger.LogInfo(
-                        $"Grounded alert already exists for Aircraft {aircraft.Id} ({aircraft.TailNumber}).");
+                        $"Grounded alert already exists for Aircraft {item.Aircraft.Id} ({item.Aircraft.TailNumber}).");
 
                     continue;
                 }
 
                 _context.Alerts.Add(new Alert
                 {
-                    AircraftId = aircraft.Id,
+                    AircraftId = item.Aircraft.Id,
                     Severity = AlertSeverity.Critical,
                     Title = "Aircraft Grounded",
-                    Message = $"Aircraft {aircraft.TailNumber} is currently grounded.",
-                    CreatedAt = DateTime.UtcNow
+                    Message = $"Aircraft {item.Aircraft.TailNumber} is currently grounded.",
+                    CreatedAt = DateTime.UtcNow,
+                    WorkOrderIds = item.CriticalWorkOrderIds
                 });
 
                 createdAlerts++;
 
                 _logger.LogWarning(
-                    $"Created grounded aircraft alert for Aircraft {aircraft.Id} ({aircraft.TailNumber}).");
+                    $"Created grounded aircraft alert for Aircraft {item.Aircraft.Id} ({item.Aircraft.TailNumber}).");
             }
 
             await _context.SaveChangesAsync();
@@ -106,7 +116,7 @@ namespace AircraftMRO.BackgroundJobs
             foreach (var workOrder in workOrders)
             {
                 bool alertExists = await _context.Alerts.AnyAsync(a =>
-                    a.WorkOrderId == workOrder.Id &&
+                    a.WorkOrderIds.Contains(workOrder.Id) &&
                     !a.ResolvedAt.HasValue &&
                     a.Title == "Overdue Work Order");
 
@@ -121,7 +131,7 @@ namespace AircraftMRO.BackgroundJobs
                 _context.Alerts.Add(new Alert
                 {
                     AircraftId = workOrder.AircraftId,
-                    WorkOrderId = workOrder.Id,
+                    WorkOrderIds = new List<int> { workOrder.Id },
                     Severity = AlertSeverity.Warning,
                     Title = "Overdue Work Order",
                     Message = $"Work Order #{workOrder.Id} has been open for more than 24 hours.",

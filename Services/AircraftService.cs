@@ -1,4 +1,4 @@
-using AircraftMRO.Data;
+using AircraftMRO.Infrastructure.Data;
 using AircraftMRO.Models.ViewModels;
 using AircraftMRO.Services.Interfaces;
 using SharedKernel.Logging.Interfaces;
@@ -11,7 +11,6 @@ using AircraftMRO.Common.Results;
 using AircraftMRO.Models;
 using AircraftMRO.Repositories;
 using Npgsql;
-using Npgsql.PostgresTypes;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Filters;
 

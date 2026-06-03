@@ -22,7 +22,7 @@ namespace AircraftMRO.Models
         public AlertSeverity Severity { get; set; } = AlertSeverity.Warning;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ResolvedAt { get; set; }
-        public int? WorkOrderId { get; set; }
+        public List<int> WorkOrderIds { get; set; } = new();
         public bool NotificationSent { get; set; }
     }
 }

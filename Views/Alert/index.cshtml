@@ -192,7 +192,7 @@
                                         @if (item.WorkOrderIds != null)
                                         {
                                             <span class="badge text-bg-light border">
-                                                #@string.Join(separator: "-", item.WorkOrderIds)
+                                                @string.Join(separator: "-", item.WorkOrderIds)
                                             </span>
                                         }
                                         else

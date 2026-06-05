@@ -587,5 +587,33 @@ namespace AircraftMRO.Services
         }
 
 
+
+
+        public async Task<MaintenanceRecordDetailsViewModel?> GetMaintenanceRecordDetailsAsync(int id)
+        {
+            return await _context.MaintenanceRecords
+                .AsNoTracking()
+                .Where(m => m.Id == id)
+                .Select(m => new MaintenanceRecordDetailsViewModel
+                {
+                    Id = m.Id,
+                    WorkOrderId = m.WorkOrderId,
+                    WorkOrderDescription = m.WorkOrder.Description,
+                    Type = m.Type,
+                    Status = m.Status,
+                    ScheduledDate = m.ScheduledDate,
+                    CompletedDate = m.CompletedDate,
+                    Notes = m.Notes,
+                    CreatedBy = m.CreatedByUser != null ? m.CreatedByUser.FullName : null,
+                    CreatedAtUtc = m.CreatedAtUtc,
+                    UpdatedBy = m.UpdatedByUser != null ? m.UpdatedByUser.FullName : null,
+                    UpdatedAtUtc = m.UpdatedAtUtc,
+                    DeletedBy = m.DeletedByUser != null ? m.DeletedByUser.FullName : null,
+                    DeletedAtUtc = m.DeletedAtUtc
+                })
+                .FirstOrDefaultAsync();
+        }
+
+
     }
 }

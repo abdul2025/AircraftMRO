@@ -105,8 +105,14 @@ namespace AircraftMRO.Services
                         .Select(a => new AircraftDetailsViewModel
                         {
                             Id = a.Id,
-
                             TailNumber = a.TailNumber,
+                            IsDeleted = a.IsDeleted,
+                            CreatedAtUtc = a.CreatedAtUtc,
+                            CreatedBy = a.CreatedByUser != null ? a.CreatedByUser.FullName : null,
+                            UpdatedAtUtc = a.UpdatedAtUtc,
+                            UpdatedBy = a.UpdatedByUser != null ? a.UpdatedByUser.FullName : null,
+                            DeletedAtUtc = a.DeletedAtUtc,
+                            DeletedBy = a.DeletedByUser != null ? a.DeletedByUser.FullName : null,
 
                             LightMaintenanceRecords = a.WorkOrders
                                 .SelectMany(w => w.MaintenanceRecords)
@@ -117,7 +123,8 @@ namespace AircraftMRO.Services
                                     Id = m.Id,
                                     WorkOrderId = m.WorkOrderId,
                                     Type = m.Type,
-                                    Status = m.Status
+                                    Status = m.Status,
+                                    IsDeleted = m.IsDeleted
                                 })
                                 .ToList(),
 
@@ -128,7 +135,8 @@ namespace AircraftMRO.Services
                                 {
                                     Id = o.Id,
                                     Priority = o.Priority,
-                                    Status = o.Status
+                                    Status = o.Status,
+                                    IsDeleted = o.IsDeleted
                                 })
                                 .ToList(),
 
@@ -139,8 +147,11 @@ namespace AircraftMRO.Services
                                 {
                                     Id = l.Id,
                                     Severity = l.Severity,
+                                    IsResolved = l.ResolvedAt.HasValue
                                 })
                                 .ToList(),
+
+
                         })
                         .FirstOrDefaultAsync();
 

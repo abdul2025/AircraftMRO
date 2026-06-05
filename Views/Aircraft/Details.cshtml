@@ -34,6 +34,126 @@
         </div>
 
     </div>
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+
+        <div class="card-header card-bg-header border-0 py-3 px-3">
+
+            <div>
+
+                <h6 class="fw-semibold based-text mb-1">
+                    Audit Information
+                </h6>
+
+                <small class="text-muted">
+                    Aircraft creation, update and deletion history
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <div class="col-md-3">
+
+                    <small class="text-muted d-block mb-1">
+                        Created By
+                    </small>
+
+                    <span class="fw-semibold">
+                        @(Model.CreatedBy ?? "-")
+                    </span>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <small class="text-muted d-block mb-1">
+                        Created At
+                    </small>
+
+                    <span class="fw-semibold">
+                        @Model.CreatedAtUtc.ToString("dd MMM yyyy HH:mm")
+                    </span>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <small class="text-muted d-block mb-1">
+                        Updated By
+                    </small>
+
+                    <span class="fw-semibold">
+                        @(Model.UpdatedBy ?? "-")
+                    </span>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <small class="text-muted d-block mb-1">
+                        Updated At
+                    </small>
+
+                    <span class="fw-semibold">
+                        @(Model.UpdatedAtUtc?.ToString("dd MMM yyyy HH:mm") ?? "-")
+                    </span>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <small class="text-muted d-block mb-1">
+                        Deleted By
+                    </small>
+
+                    <span class="fw-semibold">
+                        @(Model.DeletedBy ?? "-")
+                    </span>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <small class="text-muted d-block mb-1">
+                        Deleted At
+                    </small>
+
+                    <span class="fw-semibold">
+                        @(Model.DeletedAtUtc?.ToString("dd MMM yyyy HH:mm") ?? "-")
+                    </span>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <small class="text-muted d-block mb-1">
+                        Deleted
+                    </small>
+
+                    @if (Model.IsDeleted)
+                    {
+                        <span class="badge bg-danger">
+                            YES
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">
+                            NO
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
     <!-- Dashboard Grid -->
     <div class="row g-3">
@@ -79,6 +199,9 @@
 
                                     <tr>
                                         <th class="text-muted fw-semibold">
+                                            Id
+                                        </th>
+                                        <th class="text-muted fw-semibold">
                                             WO#
                                         </th>
                                         <th class="text-muted fw-semibold">
@@ -87,6 +210,9 @@
 
                                         <th class="text-muted fw-semibold">
                                             Status
+                                        </th>
+                                        <th class="text-muted fw-semibold">
+                                            Deleted
                                         </th>
 
                                         <th class="text-end text-muted fw-semibold">
@@ -102,6 +228,11 @@
                                     @foreach (var item in Model.LightMaintenanceRecords)
                                     {
                                         <tr>
+                                            <td class="fw-semibold">
+                                                <span class="badge bg-secondary">
+                                                    @item.Id
+                                                </span>
+                                            </td>
                                             <td>
                                                 <span class="badge bg-secondary">
                                                     <a asp-controller="WorkOrders" asp-action="Details"
@@ -120,6 +251,20 @@
                                                     @item.Status
                                                 </span>
 
+                                            </td>
+                                            <td>
+                                                @if (item.IsDeleted)
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        YES
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge  bg-success">
+                                                        NO
+                                                    </span>
+                                                }
                                             </td>
 
                                             <td class="text-end">
@@ -203,13 +348,20 @@
                                     <tr>
 
                                         <th class="text-muted fw-semibold">
+                                            Id
+                                        </th>
+                                        <th class="text-muted fw-semibold">
                                             Priority
                                         </th>
 
                                         <th class="text-muted fw-semibold">
                                             Status
                                         </th>
+                                        <th class="text-muted fw-semibold">
+                                            Deleted
+                                        </th>
 
+                                        
                                         <th class="text-end text-muted fw-semibold">
                                             View
                                         </th>
@@ -223,7 +375,11 @@
                                     @foreach (var item in Model.LightWorkOrders)
                                     {
                                         <tr>
-
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    @item.Id
+                                                </span>
+                                            </td>
                                             <td class="fw-semibold">
                                                 @item.Priority
                                             </td>
@@ -234,6 +390,20 @@
                                                     @item.Status
                                                 </span>
 
+                                            </td>
+                                            <td>
+                                                @if (item.IsDeleted)
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        YES
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge  bg-success">
+                                                        NO
+                                                    </span>
+                                                }
                                             </td>
 
                                             <td class="text-end">
@@ -316,8 +486,15 @@
                                     <tr>
 
                                         <th class="text-muted fw-semibold">
+                                            Id
+                                        </th>
+                                        <th class="text-muted fw-semibold">
                                             Severity
                                         </th>
+                                        <th class="text-muted fw-semibold">
+                                            Resolved
+                                        </th>
+
 
                                         <th class="text-end text-muted fw-semibold">
                                             View
@@ -334,15 +511,35 @@
                                         <tr>
 
                                             <td>
+                                                <span class="badge bg-secondary">
+                                                    @item.Id
+                                                </span>
+                                            </td>
+                                            <td>
 
                                                 <span class="badge text-bg-warning fw-normal">
                                                     @item.Severity
                                                 </span>
 
                                             </td>
+                                            <td>
+                                                @if (item.IsResolved)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        Resolved
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        Open
+                                                    </span>
+                                                }
+                                            </td>
 
                                             
 
+                                            
                                             <td class="text-end">
 
                                                 <a asp-controller="Alert" asp-action="Index" asp-route-id="@item.Id"

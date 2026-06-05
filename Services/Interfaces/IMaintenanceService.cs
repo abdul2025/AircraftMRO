@@ -35,5 +35,7 @@ namespace AircraftMRO.Services.Interfaces
 
         // Complated Acton
         Task<ServiceResult<MaintenanceRecord>> CompleteMaintenanceRecordAsync(int id);
+
+        Task<MaintenanceRecordDetailsViewModel?> GetMaintenanceRecordDetailsAsync(int id);
     }
 }

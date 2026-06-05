@@ -11,7 +11,7 @@ namespace AircraftMRO.Infrastructure.Data.Configurations
             builder.HasOne(m => m.WorkOrder)
                 .WithMany(w => w.MaintenanceRecords)
                 .HasForeignKey(m => m.WorkOrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

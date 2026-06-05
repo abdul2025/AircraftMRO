@@ -19,5 +19,7 @@ namespace AircraftMRO.Models.ViewModels.MaintenanceRecord
         public DateTime? CompletedDate { get; set; }
 
         public string Notes { get; set; } = string.Empty;
+        public bool IsDeleted { get; set; } 
+        
     }
 }

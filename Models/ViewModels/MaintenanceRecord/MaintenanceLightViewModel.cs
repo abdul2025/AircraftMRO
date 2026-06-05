@@ -10,6 +10,7 @@ namespace AircraftMRO.Models.ViewModels.MaintenanceRecord
     {
         public int Id { get; set; }
         public int WorkOrderId { get; set; }
+        public bool IsDeleted { get; set; }
 
         public MaintenanceType Type { get; set; }
         public MaintenanceStatus Status { get; set; } = MaintenanceStatus.Scheduled;

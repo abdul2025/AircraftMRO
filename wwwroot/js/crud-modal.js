@@ -25,9 +25,25 @@ async function openCrudModal(url) {
 
     document.getElementById('crudModalContent').innerHTML = html;
 
-    // Initialize TomSelect for any select marked with data-tom-select
-    document
-        .querySelectorAll('#crudModalContent select[data-tom-select]')
+    initializeTomSelect(
+        document.getElementById('crudModalContent')
+    );
+
+    initializePasswordToggle(
+        document.getElementById('crudModalContent')
+    );
+
+    initializeValidation();
+
+    bindCrudForm();
+
+    crudModal.show();
+}
+
+function initializeTomSelect(container = document) {
+
+    container
+        .querySelectorAll('select[data-tom-select]')
         .forEach(select => {
 
             if (!select.tomselect) {
@@ -41,23 +57,60 @@ async function openCrudModal(url) {
             }
 
         });
+}
 
-    initializeValidation();
+function initializePasswordToggle(container = document) {
 
-    bindCrudForm();
+    container
+        .querySelectorAll('.toggle-password')
+        .forEach(button => {
 
-    crudModal.show();
+            button.addEventListener('click', function () {
+
+                const input =
+                    this.closest('.input-group')
+                        .querySelector('.password-input');
+
+                const icon =
+                    this.querySelector('i');
+
+                if (!input)
+                    return;
+
+                if (input.type === 'password') {
+
+                    input.type = 'text';
+
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+
+                }
+                else {
+
+                    input.type = 'password';
+
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+
+            });
+
+        });
 }
 
 function initializeValidation() {
 
     const form = $('#crudModalContent form');
 
+    if (!form.length)
+        return;
+
     form.removeData('validator');
     form.removeData('unobtrusiveValidation');
 
     $.validator.unobtrusive.parse(form);
 }
+
 
 function bindCrudForm() {
 
@@ -70,33 +123,48 @@ function bindCrudForm() {
 
         e.preventDefault();
 
-        // VALIDATION CHECK
         if (!$(form).valid()) {
             return;
         }
 
-        const formData = new FormData(form);
+        try {
 
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: formData
-        });
+            const formData =
+                new FormData(form);
 
-        const html = await response.text();
+            const response =
+                await fetch(form.action, {
+                    method: form.method,
+                    body: formData
+                });
 
-        // If validation failed server-side
-        if (!response.redirected) {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            const html =
+                await response.text();
 
             document.getElementById('crudModalContent').innerHTML = html;
+
+            initializeTomSelect(
+                document.getElementById('crudModalContent')
+            );
+
+            initializePasswordToggle(
+                document.getElementById('crudModalContent')
+            );
 
             initializeValidation();
 
             bindCrudForm();
-
-            return;
         }
+        catch (error) {
 
-        // Success
-        window.location.href = response.url;
+            console.error(error);
+
+            alert('An unexpected error occurred.');
+        }
     });
 }

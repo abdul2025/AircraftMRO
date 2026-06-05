@@ -84,7 +84,7 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Redirection
+// Redirection for unauth and unauthenticated 
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login"; // Redirect for if not logged in
@@ -99,6 +99,12 @@ builder.Services.AddControllersWithViews(options =>
 
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(policy));
 });
+
+
+// For Audit Action for all abstracted entity of AuditableEntity
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 
 

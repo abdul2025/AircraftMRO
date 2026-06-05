@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AircraftMRO.Infrastructure.Identity.ViewModels
 {
@@ -27,5 +28,6 @@ namespace AircraftMRO.Infrastructure.Identity.ViewModels
         [Compare(nameof(Password))]
         [DataType(DataType.Password)]
         public string ConfirmPassword { get; set; } = string.Empty;
+        public IEnumerable<SelectListItem> Roles { get; set; } = Enumerable.Empty<SelectListItem>();
     }
 }

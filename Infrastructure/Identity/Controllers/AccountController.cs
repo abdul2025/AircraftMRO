@@ -72,10 +72,13 @@ namespace AircraftMRO.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            PopulateRoles();
+            var model = new CreateUserViewModel();
 
-            return View();
+            PopulateRoles(model);
+
+            return PartialView("_Create", model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -83,8 +86,9 @@ namespace AircraftMRO.Controllers
         {
             if (!ModelState.IsValid)
             {
-                PopulateRoles();
-                return View(model);
+                PopulateRoles(model);
+
+                return PartialView("_Create", model);
             }
 
             var user = new ApplicationUser
@@ -110,28 +114,33 @@ namespace AircraftMRO.Controllers
                         error.Description);
                 }
 
-                PopulateRoles();
-                return View(model);
+                PopulateRoles(model);
+
+                return PartialView("_Create", model);
             }
 
             await _userManager.AddToRoleAsync(
                 user,
                 model.Role);
 
-            TempData["Success"] =
-                $"User {model.FullName} created successfully.";
+            // Fresh model
+            var newModel = new CreateUserViewModel();
 
-            return RedirectToAction(nameof(Create));
+            PopulateRoles(newModel);
+
+            ViewBag.SuccessMessage =
+                $"User '{user.FullName}' created successfully.";
+
+            return PartialView("_Create", newModel);
         }
 
-        private void PopulateRoles()
+        private static void PopulateRoles(CreateUserViewModel model)
         {
-            ViewBag.Roles = Roles.All
-                .Select(r => new SelectListItem
-                {
-                    Value = r,
-                    Text = r
-                });
+            model.Roles = Roles.All.Select(r => new SelectListItem
+            {
+                Value = r,
+                Text = r
+            });
         }
 
         [HttpPost]

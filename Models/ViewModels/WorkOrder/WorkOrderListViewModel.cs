@@ -20,9 +20,11 @@ namespace AircraftMRO.Models.ViewModels.WorkOrder
 
         public WorkOrderStatus Status { get; set; } = WorkOrderStatus.Open;
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
 
         public DateTime? CompletedAt { get; set; }
+        public bool IsDeleted { get; set; } 
+
         public int MaintenanceRecordCount { get; set; }
 
     }

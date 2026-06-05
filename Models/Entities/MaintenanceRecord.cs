@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AircraftMRO.Models.Entities;
 using AircraftMRO.Models.Enums;
 
 namespace AircraftMRO.Models
 {
-    public class MaintenanceRecord
+    public class MaintenanceRecord : AuditableEntity
     {
         public int Id { get; set; }
 

@@ -33,6 +33,21 @@ namespace AircraftMRO.Controllers
 
 
         [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            MaintenanceRecordDetailsViewModel? model = await _maintenanceService.GetMaintenanceRecordDetailsAsync(id);
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
+
+        }
+
+
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             MaintenanceCreateViewModel viewModel = await _maintenanceService.GetCreateViewModelAsync();

@@ -53,7 +53,7 @@ namespace AircraftMRO.Services
             int totalItems = await query.CountAsync();
 
             List<WorkOrderListViewModel> items = await query
-                .OrderByDescending(w => w.CreatedAt)
+                .OrderByDescending(w => w.CreatedAtUtc)
                 .Skip((filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .Select(w => new WorkOrderListViewModel
@@ -64,8 +64,9 @@ namespace AircraftMRO.Services
                     Description = w.Description,
                     Priority = w.Priority,
                     Status = w.Status,
-                    CreatedAt = w.CreatedAt,
+                    CreatedAtUtc = w.CreatedAtUtc,
                     CompletedAt = w.CompletedAt,
+                    IsDeleted = w.IsDeleted,
                     MaintenanceRecordCount = w.MaintenanceRecords.Count()
 
                 })
@@ -95,8 +96,15 @@ namespace AircraftMRO.Services
                         Description = w.Description,
                         Priority = w.Priority,
                         Status = w.Status,
-                        CreatedAt = w.CreatedAt,
+                        CreatedAtUtc = w.CreatedAtUtc,
                         CompletedAt = w.CompletedAt,
+                        IsDeleted = w.IsDeleted,
+                        CreatedBy = w.CreatedByUser != null ? w.CreatedByUser.FullName : null,
+                        UpdatedBy = w.UpdatedByUser != null ? w.UpdatedByUser.FullName : null,
+                        UpdatedAtUtc = w.UpdatedAtUtc,
+                        DeletedBy = w.DeletedByUser != null ? w.DeletedByUser.FullName : null,
+                        DeletedAtUtc = w.DeletedAtUtc,
+
 
                         MaintenanceRecordCount = w.MaintenanceRecords.Count(),
 
@@ -109,7 +117,8 @@ namespace AircraftMRO.Services
                                 Status = m.Status,
                                 ScheduledDate = m.ScheduledDate,
                                 CompletedDate = m.CompletedDate,
-                                Notes = m.Notes
+                                Notes = m.Notes,
+                                IsDeleted = m.IsDeleted
                             })
                             .ToList()
                     })
@@ -192,7 +201,7 @@ namespace AircraftMRO.Services
                     Description = model.Description,
                     Priority = model.Priority,
                     Status = WorkOrderStatus.Open,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAtUtc = DateTime.UtcNow,
 
                     Aircraft = aircraft
                 };
@@ -384,7 +393,7 @@ namespace AircraftMRO.Services
                     .Include(a => a.WorkOrders)
                     .FirstAsync(a => a.Id == workOrder.AircraftId);
 
-                
+
                 IEnumerable<WorkOrder> CurrentWorkOrderInDB = aircraft.WorkOrders.Where(w => w.Id != workOrder.Id);
                 _aircraftStatusService.UpdateAircraftStatus(aircraft, CurrentWorkOrderInDB);
 

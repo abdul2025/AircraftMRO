@@ -139,12 +139,16 @@
                             <th class="py-2 based-text text-nowrap">
                                 Completed
                             </th>
-                            
 
+                            
                             <th class="py-2 based-text text-nowrap">
                                 Maintenance Records
                             </th>
+                            <th class="py-2 based-text text-nowrap">
+                                IsDeleted
+                            </th>
 
+                            
                             <th class="py-2 based-text text-nowrap">
                                 Actions
                             </th>
@@ -245,7 +249,7 @@
                                     <!-- Created -->
                                     <td class="py-2 based-text text-nowrap">
 
-                                        @item.CreatedAt.ToString("dd MMM yyyy hh:mm tt")
+                                        @item.CreatedAtUtc.ToString("dd MMM yyyy hh:mm tt")
                                     </td>
 
                                     <!-- Completed -->
@@ -258,6 +262,20 @@
                                             @item.MaintenanceRecordCount
                                         </span>
 
+                                    </td>
+                                    <td>
+                                        @if (item.IsDeleted)
+                                        {
+                                            <span class="badge bg-danger">
+                                                YES
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge  bg-success">
+                                                NO
+                                            </span>
+                                        }
                                     </td>
 
                                     <!-- Actions -->

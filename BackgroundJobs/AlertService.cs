@@ -25,7 +25,6 @@ namespace AircraftMRO.BackgroundJobs
 
                 await CheckGroundedAircraftAlerts();
                 await CheckOverdueWorkOrdersAlerts();
-                await CheckLongMaintenanceAlerts();
 
                 _logger.LogInfo("Alert background job completed successfully.");
             }
@@ -80,7 +79,6 @@ namespace AircraftMRO.BackgroundJobs
                     Severity = AlertSeverity.Critical,
                     Title = "Aircraft Grounded",
                     Message = $"Aircraft {item.Aircraft.TailNumber} is currently grounded.",
-                    CreatedAt = DateTime.UtcNow,
                     WorkOrderIds = item.CriticalWorkOrderIds
                 });
 
@@ -108,7 +106,7 @@ namespace AircraftMRO.BackgroundJobs
                     (w.Priority == WorkOrderPriority.High ||
                      w.Priority == WorkOrderPriority.Critical) &&
                     w.Status != WorkOrderStatus.Closed &&
-                    w.CreatedAt <= threshold)
+                    w.CreatedAtUtc <= threshold)
                 .ToListAsync();
 
             int createdAlerts = 0;
@@ -134,8 +132,7 @@ namespace AircraftMRO.BackgroundJobs
                     WorkOrderIds = new List<int> { workOrder.Id },
                     Severity = AlertSeverity.Warning,
                     Title = "Overdue Work Order",
-                    Message = $"Work Order #{workOrder.Id} has been open for more than 24 hours.",
-                    CreatedAt = DateTime.UtcNow
+                    Message = $"Work Order #{workOrder.Id} has been open for more than 24 hours."
                 });
 
                 createdAlerts++;
@@ -148,58 +145,6 @@ namespace AircraftMRO.BackgroundJobs
 
             _logger.LogInfo(
                 $"Overdue work order alert check completed. Created {createdAlerts} alert(s).");
-        }
-
-        public async Task CheckLongMaintenanceAlerts()
-        {
-            _logger.LogInfo("Checking extended maintenance alerts.");
-
-            var threshold = DateTime.UtcNow.AddDays(-7);
-
-            var aircrafts = await _context.Aircrafts
-                .Where(a =>
-                    a.Status == AircraftStatus.Maintenance &&
-                    a.WorkOrders.Any(w =>
-                        w.Status != WorkOrderStatus.Closed &&
-                        w.CreatedAt <= threshold))
-                .ToListAsync();
-
-            int createdAlerts = 0;
-
-            foreach (var aircraft in aircrafts)
-            {
-                bool alertExists = await _context.Alerts.AnyAsync(a =>
-                    a.AircraftId == aircraft.Id &&
-                    !a.ResolvedAt.HasValue &&
-                    a.Title == "Extended Maintenance");
-
-                if (alertExists)
-                {
-                    _logger.LogInfo(
-                        $"Extended maintenance alert already exists for Aircraft {aircraft.Id} ({aircraft.TailNumber}).");
-
-                    continue;
-                }
-
-                _context.Alerts.Add(new Alert
-                {
-                    AircraftId = aircraft.Id,
-                    Severity = AlertSeverity.Warning,
-                    Title = "Extended Maintenance",
-                    Message = $"Aircraft {aircraft.TailNumber} has been under maintenance for more than 7 days.",
-                    CreatedAt = DateTime.UtcNow
-                });
-
-                createdAlerts++;
-
-                _logger.LogWarning(
-                    $"Created extended maintenance alert for Aircraft {aircraft.Id} ({aircraft.TailNumber}).");
-            }
-
-            await _context.SaveChangesAsync();
-
-            _logger.LogInfo(
-                $"Extended maintenance alert check completed. Created {createdAlerts} alert(s).");
         }
     }
 }

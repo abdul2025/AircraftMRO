@@ -1,3 +1,4 @@
+using AircraftMRO.Infrastructure.Data;
 using AircraftMRO.Models;
 using AircraftMRO.Models.Enums;
 using AircraftMRO.Services.Interfaces;
@@ -8,10 +9,13 @@ namespace AircraftMRO.Services
     public class AircraftStatusService : IAircraftStatusService
     {
         private readonly IAppLogger _logger;
+        private readonly ApplicationDbContext _context;
 
-        public AircraftStatusService(IAppLogger logger)
+
+        public AircraftStatusService(IAppLogger logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
         /*
         * Aircraft Status Rules
@@ -109,11 +113,12 @@ namespace AircraftMRO.Services
                     });
             }
 
-            // Resolve active Alerts for Aircraft Back to service. //TODO: THIS SHOULD BE IN ANOTHER SERVICE as Resolve Alerts
+            // Resolve active Alerts for Aircraft Back to Active from Grounded. //TODO: THIS SHOULD BE IN ANOTHER SERVICE as Resolve Alerts Service
             if (previousStatus == AircraftStatus.Grounded && newStatus != AircraftStatus.Grounded)
             {
-                ICollection<Alert> activeAlerts = aircraft.Alerts
+                List<Alert> activeAlerts = _context.Alerts
                     .Where(a =>
+                        a.AircraftId == aircraft.Id &&
                         a.ResolvedAt == null &&
                         a.Title == "Aircraft Grounded")
                     .ToList();
@@ -140,7 +145,7 @@ namespace AircraftMRO.Services
 
 
 
-            
+
         }
     }
 }

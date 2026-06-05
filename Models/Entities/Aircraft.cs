@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using AircraftMRO.Models.Entities;
 using AircraftMRO.Models.Enums;
 
 namespace AircraftMRO.Models
 {
-    public class Aircraft
+    public class Aircraft : AuditableEntity
     {
         public int Id { get; set; }
 
@@ -29,7 +30,6 @@ namespace AircraftMRO.Models
 
         public int TotalFlightHours { get; set; }
 
-        public bool IsDeleted { get; set; }
 
         // Relationships
         public ICollection<WorkOrder> WorkOrders { get; set; }

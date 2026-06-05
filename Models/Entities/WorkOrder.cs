@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AircraftMRO.Models.Entities;
 using AircraftMRO.Models.Enums;
 
 namespace AircraftMRO.Models
 {
-    public class WorkOrder
+    public class WorkOrder : AuditableEntity
     {
         public int Id { get; set; }
 
@@ -21,8 +22,6 @@ namespace AircraftMRO.Models
         public WorkOrderPriority Priority { get; set; } = WorkOrderPriority.Medium;
 
         public WorkOrderStatus Status { get; set; } = WorkOrderStatus.Open;
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? CompletedAt { get; set; }
 

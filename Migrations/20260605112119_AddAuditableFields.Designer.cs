@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AircraftMRO.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AircraftMRO.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605112119_AddAuditableFields")]
+    partial class AddAuditableFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -518,7 +521,7 @@ namespace AircraftMRO.Migrations
                     b.HasOne("AircraftMRO.Models.Aircraft", "Aircraft")
                         .WithMany("Alerts")
                         .HasForeignKey("AircraftId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AircraftMRO.Infrastructure.Identity.Entities.ApplicationUser", "CreatedByUser")
@@ -559,7 +562,7 @@ namespace AircraftMRO.Migrations
                     b.HasOne("AircraftMRO.Models.WorkOrder", "WorkOrder")
                         .WithMany("MaintenanceRecords")
                         .HasForeignKey("WorkOrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CreatedByUser");
@@ -576,7 +579,7 @@ namespace AircraftMRO.Migrations
                     b.HasOne("AircraftMRO.Models.Aircraft", "Aircraft")
                         .WithMany("WorkOrders")
                         .HasForeignKey("AircraftId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AircraftMRO.Infrastructure.Identity.Entities.ApplicationUser", "CreatedByUser")

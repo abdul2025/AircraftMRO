@@ -41,7 +41,7 @@ namespace AircraftMRO.Controllers
             int totalCount = await query.CountAsync();
 
             List<AlertListViewModel> items = await query
-                .OrderByDescending(a => a.CreatedAt)
+                .OrderByDescending(a => a.CreatedAtUtc)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(a => new AlertListViewModel
@@ -50,7 +50,6 @@ namespace AircraftMRO.Controllers
                     Title = a.Title,
                     AircraftTailNumber = a.Aircraft.TailNumber,
                     Severity = a.Severity,
-                    CreatedAt = a.CreatedAt,
                     IsResolved = a.ResolvedAt != null,
                     ResolvedAt = a.ResolvedAt,
                     NotificationSent = a.NotificationSent,

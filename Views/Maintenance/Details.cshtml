@@ -1,0 +1,242 @@
+@using AircraftMRO.Models.ViewModels.MaintenanceRecord
+@model MaintenanceRecordDetailsViewModel
+
+@{
+    ViewData["Title"] = "Maintenance Record Details";
+}
+
+<div class="container-fluid px-0">
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+
+        <div>
+
+            <h2 class="fw-bold based-text mb-1">
+                Maintenance Record #@Model.Id
+            </h2>
+
+            <p class="text-muted mb-0 small">
+                Maintenance Record Overview
+            </p>
+
+        </div>
+
+        <div>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary rounded-pill px-4">
+
+                <i class="bi bi-arrow-left me-2"></i>
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="row g-3">
+
+        <!-- Maintenance Information -->
+        <div class="col-12 col-lg-6">
+
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+
+                <div class="card-header card-bg-header border-0 py-3 px-3">
+
+                    <h6 class="fw-semibold based-text mb-1">
+                        Maintenance Information
+                    </h6>
+
+                    <small class="text-muted">
+                        General record information
+                    </small>
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-borderless align-middle mb-0">
+
+                        <tbody>
+
+                            <tr>
+                                <th width="35%">Record ID</th>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        @Model.Id
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Work Order</th>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        WO-@Model.WorkOrderId
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Type</th>
+                                <td>@Model.Type</td>
+                            </tr>
+
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-normal">
+                                        @Model.Status
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Scheduled Date</th>
+                                <td>
+                                    @Model.ScheduledDate.ToString("yyyy-MM-dd")
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Completed Date</th>
+                                <td>
+                                    @(Model.CompletedDate?.ToString("yyyy-MM-dd") ?? "-")
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Notes -->
+        <div class="col-12 col-lg-6">
+
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+
+                <div class="card-header card-bg-header border-0 py-3 px-3">
+
+                    <h6 class="fw-semibold based-text mb-1">
+                        Notes
+                    </h6>
+
+                    <small class="text-muted">
+                        Maintenance comments
+                    </small>
+
+                </div>
+
+                <div class="card-body">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                    {
+                        <p class="mb-0">
+                            @Model.Notes
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">
+                            No notes available.
+                        </p>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Audit Information -->
+        <div class="col-12">
+
+            <div class="card border-0 shadow-sm rounded-3">
+
+                <div class="card-header card-bg-header border-0 py-3 px-3">
+
+                    <h6 class="fw-semibold based-text mb-1">
+                        Audit Information
+                    </h6>
+
+                    <small class="text-muted">
+                        Creation, modification and deletion history
+                    </small>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-4">
+
+                            <h6 class="text-muted mb-3">
+                                Created
+                            </h6>
+
+                            <p class="mb-1">
+                                <strong>User:</strong>
+                                @(Model.CreatedBy ?? "-")
+                            </p>
+
+                            <p class="mb-0">
+                                <strong>Date:</strong>
+                                @Model.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")
+                            </p>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <h6 class="text-muted mb-3">
+                                Updated
+                            </h6>
+
+                            <p class="mb-1">
+                                <strong>User:</strong>
+                                @(Model.UpdatedBy ?? "-")
+                            </p>
+
+                            <p class="mb-0">
+                                <strong>Date:</strong>
+                                @(Model.UpdatedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+                            </p>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <h6 class="text-muted mb-3">
+                                Deleted
+                            </h6>
+
+                            <p class="mb-1">
+                                <strong>User:</strong>
+                                @(Model.DeletedBy ?? "-")
+                            </p>
+
+                            <p class="mb-0">
+                                <strong>Date:</strong>
+                                @(Model.DeletedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "-")
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

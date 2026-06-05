@@ -87,6 +87,17 @@
                 <div class="col-md-4">
 
                     <small class="text-muted d-block mb-1">
+                        Id
+                    </small>
+
+                    <span class="fw-semibold">
+                        @Model.Id
+                    </span>
+
+                </div>
+                <div class="col-md-4">
+
+                    <small class="text-muted d-block mb-1">
                         Aircraft
                     </small>
 
@@ -127,7 +138,7 @@
                     </small>
 
                     <span class="fw-semibold">
-                        @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")
+                        @Model.CreatedAtUtc.ToString("dd MMM yyyy HH:mm")
                     </span>
 
                 </div>
@@ -155,6 +166,7 @@
                     </span>
 
                 </div>
+                
 
                 <div class="col-12">
 
@@ -168,15 +180,148 @@
 
                 </div>
 
+                
+
             </div>
 
         </div>
 
     </div>
 
+    <!-- Work Order Audit Information -->
+
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+
+    <div class="card-header card-bg-header border-0 py-3 px-3">
+
+        <div>
+
+            <h6 class="fw-semibold based-text mb-1">
+                Audit Information
+            </h6>
+
+            <small class="text-muted">
+                Record creation, update and deletion history
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+
+                <small class="text-muted d-block mb-1">
+                    Created By
+                </small>
+
+                <span class="fw-semibold">
+                    @(Model.CreatedBy ?? "-")
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <small class="text-muted d-block mb-1">
+                    Created At
+                </small>
+
+                <span class="fw-semibold">
+                    @Model.CreatedAtUtc.ToString("dd MMM yyyy HH:mm")
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+            </div>
+
+            <div class="col-md-4">
+
+                <small class="text-muted d-block mb-1">
+                    Updated By
+                </small>
+
+                <span class="fw-semibold">
+                    @(Model.UpdatedBy ?? "-")
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <small class="text-muted d-block mb-1">
+                    Updated At
+                </small>
+
+                <span class="fw-semibold">
+                    @(Model.UpdatedAtUtc?.ToString("dd MMM yyyy HH:mm") ?? "-")
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+            </div>
+
+            <div class="col-md-4">
+
+                <small class="text-muted d-block mb-1">
+                    Deleted By
+                </small>
+
+                <span class="fw-semibold">
+                    @(Model.DeletedBy ?? "-")
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <small class="text-muted d-block mb-1">
+                    Deleted At
+                </small>
+
+                <span class="fw-semibold">
+                    @(Model.DeletedAtUtc?.ToString("dd MMM yyyy HH:mm") ?? "-")
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <small class="text-muted d-block mb-1">
+                    Deleted Status
+                </small>
+
+                @if (Model.IsDeleted)
+                {
+                    <span class="badge bg-danger">
+                        YES
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-success">
+                        NO
+                    </span>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
     <!-- Maintenance Records -->
 
-    <div class="card border-0 shadow-sm rounded-3">
+    <div class="card border-0 shadow-sm rounded-3 mb-5">
 
         <div class="card-header card-bg-header border-0 py-3 px-3">
 
@@ -201,6 +346,7 @@
             </div>
 
         </div>
+        
 
         <div class="card-body p-0">
 
@@ -232,11 +378,16 @@
                                 <th class="text-muted fw-semibold">
                                     Completed
                                 </th>
+                                <th class="text-muted fw-semibold">
+                                    IsDeleted
+                                </th>
 
                                 <th class="text-muted fw-semibold">
                                     Notes
                                 </th>
+                                
 
+                                
                                 <th class="text-end text-muted fw-semibold">
                                     View
                                 </th>
@@ -278,6 +429,22 @@
                                     <td>
                                         @(record.CompletedDate?.ToString("dd MMM yyyy") ?? "-")
                                     </td>
+                                    <td>
+                                        <p class="mb-0">
+                                            @if (record.IsDeleted)
+                                            {
+                                                <span class="badge bg-danger">
+                                                    YES
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge  bg-success">
+                                                    NO
+                                                </span>
+                                            }
+                                        </p>
+                                    </td>
 
                                     <td style="max-width:300px;">
                                         <div class="text-truncate">
@@ -287,9 +454,10 @@
                                         </div>
                                     </td>
 
+                                    
                                     <td class="text-end">
 
-                                        <a asp-controller="MaintenanceRecord" asp-action="Details" asp-route-id="@record.Id"
+                                        <a asp-controller="Maintenance" asp-action="Details" asp-route-id="@record.Id"
                                            class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex align-items-center justify-content-center"
                                            style="width:32px;height:32px;">
 

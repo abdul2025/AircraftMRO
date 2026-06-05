@@ -11,7 +11,7 @@ namespace AircraftMRO.Infrastructure.Data.Configurations
             builder.HasOne(a => a.Aircraft)
                 .WithMany(a => a.Alerts)
                 .HasForeignKey(a => a.AircraftId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -119,7 +119,7 @@
                             <th class="py-2 based-text text-nowrap">Maintenance</th>
                             <th class="py-2 based-text text-nowrap">Work Orders</th>
                             <th class="py-2 based-text text-nowrap">Alerts</th>
-                            <th class="py-2 based-text text-nowrap">State</th>
+                            <th class="py-2 based-text text-nowrap">Deleted</th>
                             <th class="py-2 based-text text-nowrap">Actions</th>
 
                         </tr>
@@ -213,22 +213,20 @@
 
                                     </td>
 
-                                    <!-- State -->
-                                    <td class="py-2 based-text text-nowrap">
-
+                                    <!-- IsDeleted -->
+                                    <td>
                                         @if (item.IsDeleted)
                                         {
-                                            <span class="badge text-bg-danger px-3 py-2">
-                                                Deleted
+                                            <span class="badge bg-danger">
+                                                YES
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge text-bg-success px-3 py-2">
-                                                Active
+                                            <span class="badge  bg-success">
+                                                NO
                                             </span>
                                         }
-
                                     </td>
 
                                     <!-- Actions -->

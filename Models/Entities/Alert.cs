@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AircraftMRO.Models.Entities;
 using AircraftMRO.Models.Enums;
 
 namespace AircraftMRO.Models
 {
-    public class Alert
+    public class Alert : AuditableEntity
     {
         public int Id { get; set; }
 
@@ -20,7 +21,6 @@ namespace AircraftMRO.Models
         [Required]
         [MaxLength(300)]
         public AlertSeverity Severity { get; set; } = AlertSeverity.Warning;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ResolvedAt { get; set; }
         public List<int> WorkOrderIds { get; set; } = new();
         public bool NotificationSent { get; set; }

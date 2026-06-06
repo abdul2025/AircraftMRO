@@ -2,23 +2,26 @@ using AircraftMRO.Infrastructure.Identity.Constants;
 using AircraftMRO.Infrastructure.Identity.Entities;
 using AircraftMRO.Infrastructure.Identity.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SharedKernel.Logging.Interfaces;
+using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
+using AircraftMRO.Infrastructure.Models;
 
 namespace AircraftMRO.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IIdentityService _identityService;
+        private readonly IAppLogger<AccountController> _logger;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(IIdentityService identityService, IAppLogger<AccountController> logger)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _identityService = identityService;
+            _logger = logger;
         }
 
+        // Login GET
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
@@ -26,49 +29,37 @@ namespace AircraftMRO.Controllers
             return View();
         }
 
+
+
+        // Login POST
         [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(
-            LoginViewModel model,
-            string? returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
-                return View(model);
-
-            var result = await _signInManager.PasswordSignInAsync(
-                model.Email,
-                model.Password,
-                model.RememberMe,
-                lockoutOnFailure: true);
-
-            if (result.Succeeded)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-
-                if (user is not null)
-                {
-                    user.LastLoginAtUtc = DateTime.UtcNow;
-
-                    await _userManager.UpdateAsync(user);
-                }
-
-                if (!string.IsNullOrWhiteSpace(returnUrl)
-                    && Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
-
-                return RedirectToAction("Index", "Home");
+                return View(model);
             }
 
-            ModelState.AddModelError(
-                string.Empty,
-                "Invalid email or password.");
+            var result = await _identityService.AuthenticateAsync(model.Email, model.Password);
 
-            return View(model);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Invalid email or password.");
+                return View(model);
+            }
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction("Index", "Home");
         }
 
+
+        // Create GET
         [HttpGet]
         public IActionResult Create()
         {
@@ -79,10 +70,10 @@ namespace AircraftMRO.Controllers
             return PartialView("_Create", model);
         }
 
+        // Create POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            CreateUserViewModel model)
+        public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -91,49 +82,34 @@ namespace AircraftMRO.Controllers
                 return PartialView("_Create", model);
             }
 
-            var user = new ApplicationUser
+            var request = new CreateUserRequest
             {
-                UserName = model.Email,
-                Email = model.Email,
                 FullName = model.FullName,
                 EmployeeNumber = model.EmployeeNumber,
-                EmailConfirmed = true,
-                IsActive = true
+                Email = model.Email,
+                Password = model.Password,
+                Role = model.Role
             };
 
-            var result = await _userManager.CreateAsync(
-                user,
-                model.Password);
+            var result = await _identityService.CreateUserAsync(request);
 
-            if (!result.Succeeded)
+            if (!result.Success)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        error.Description);
-                }
-
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Failed to create user.");
                 PopulateRoles(model);
-
                 return PartialView("_Create", model);
             }
-
-            await _userManager.AddToRoleAsync(
-                user,
-                model.Role);
-
-            // Fresh model
+            
+            ModelState.Clear();
             var newModel = new CreateUserViewModel();
 
             PopulateRoles(newModel);
 
-            ViewBag.SuccessMessage =
-                $"User '{user.FullName}' created successfully.";
+            ViewBag.SuccessMessage = $"User '{model.FullName}' created successfully.";
 
             return PartialView("_Create", newModel);
         }
-
+        // Helper Function 
         private static void PopulateRoles(CreateUserViewModel model)
         {
             model.Roles = Roles.All.Select(r => new SelectListItem
@@ -143,14 +119,15 @@ namespace AircraftMRO.Controllers
             });
         }
 
+
+        // LOGOUT POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _identityService.LogoutAsync();
 
-            return RedirectToAction(
-                nameof(Login));
+            return RedirectToAction(nameof(Login));
         }
 
         [AllowAnonymous]

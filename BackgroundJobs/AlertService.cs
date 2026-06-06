@@ -9,9 +9,9 @@ namespace AircraftMRO.BackgroundJobs
     public class AlertJobsService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IAppLogger _logger;
+        private readonly IAppLogger<AlertJobsService> _logger;
 
-        public AlertJobsService(ApplicationDbContext context, IAppLogger logger)
+        public AlertJobsService(ApplicationDbContext context, IAppLogger<AlertJobsService> logger)
         {
             _context = context;
             _logger = logger;

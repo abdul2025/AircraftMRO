@@ -16,13 +16,13 @@ namespace AircraftMRO.Services
     public class MaintenanceService : IMaintenanceService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IAppLogger _logger;
+        private readonly IAppLogger<MaintenanceService> _logger;
         private readonly IBaseRepository<MaintenanceRecord> _repository;
         private readonly IAircraftStatusService _aircraftStatusService;
 
 
 
-        public MaintenanceService(ApplicationDbContext context, IAppLogger logger, IBaseRepository<MaintenanceRecord> repository, IAircraftStatusService aircraftStatusService)
+        public MaintenanceService(ApplicationDbContext context, IAppLogger<MaintenanceService> logger, IBaseRepository<MaintenanceRecord> repository, IAircraftStatusService aircraftStatusService)
         {
             _context = context;
             _logger = logger;
@@ -99,12 +99,11 @@ namespace AircraftMRO.Services
         }
 
 
-        public async Task<MaintenanceCreateViewModel> PopulateCreateViewModelAsync(
-        MaintenanceCreateViewModel viewModel)
+        public async Task<MaintenanceCreateViewModel> PopulateCreateViewModelAsync(MaintenanceCreateViewModel viewModel)
         {
 
             viewModel.WorkOrders = await _context.WorkOrders
-                .AsNoTracking()
+                .AsNoTracking() // No need to keep it in memory for any Db Action
                 .OrderByDescending(w => w.Id)
                 .Select(w => new SelectListItem
                 {
@@ -131,7 +130,7 @@ namespace AircraftMRO.Services
                     };
                 }
 
-                DateTime scheduledDateUtc = DateTime.SpecifyKind(viewModel.ScheduledDate, DateTimeKind.Utc);
+                DateTime scheduledDateUtc = DateTime.SpecifyKind(viewModel.ScheduledDate, DateTimeKind.Utc); // PostgresSQL expecting timestamp with time zone, Specifying the kind of the date as UTC
 
                 MaintenanceRecord maintenanceRecord = new()
                 {
@@ -198,7 +197,7 @@ namespace AircraftMRO.Services
         {
             MaintenanceEditViewModel? viewModel =
                 await _context.MaintenanceRecords
-                    .AsNoTracking()
+                    .AsNoTracking() // Just reading no tracking is required in memory 
                     .Where(m => m.Id == id)
                     .Select(m => new MaintenanceEditViewModel
                     {

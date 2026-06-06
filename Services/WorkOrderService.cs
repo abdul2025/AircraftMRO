@@ -18,12 +18,12 @@ namespace AircraftMRO.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IBaseRepository<WorkOrder> _repository;
-        private readonly IAppLogger _logger;
+        private readonly IAppLogger<WorkOrderService> _logger;
         private readonly IAircraftStatusService _aircraftStatusService;
 
 
 
-        public WorkOrderService(ApplicationDbContext context, IAppLogger logger, IBaseRepository<WorkOrder> repository, IAircraftStatusService aircraftStatusService)
+        public WorkOrderService(ApplicationDbContext context, IAppLogger<WorkOrderService> logger, IBaseRepository<WorkOrder> repository, IAircraftStatusService aircraftStatusService)
         {
             _context = context;
             _logger = logger;

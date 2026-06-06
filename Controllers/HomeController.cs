@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using AircraftMRO.Models;
 using SharedKernel.Logging.Interfaces;
 
 namespace AircraftMRO.Controllers;
@@ -8,9 +6,9 @@ namespace AircraftMRO.Controllers;
 public class HomeController : Controller
 {
 
-    private readonly IAppLogger _logger;
+    private readonly IAppLogger<HomeController> _logger;
 
-    public HomeController(IAppLogger logger)
+    public HomeController(IAppLogger<HomeController> logger)
     {
         _logger  = logger;
     }

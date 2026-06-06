@@ -21,11 +21,11 @@ namespace AircraftMRO.Services
     {
 
         private readonly ApplicationDbContext _context;
-        private readonly IAppLogger _logger;
+        private readonly IAppLogger<AircraftService> _logger;
         private readonly IBaseRepository<Aircraft> _repository;
 
 
-        public AircraftService(ApplicationDbContext context, IAppLogger logger, IBaseRepository<Aircraft> repository)
+        public AircraftService(ApplicationDbContext context, IAppLogger<AircraftService> logger, IBaseRepository<Aircraft> repository)
         {
             _context = context;
             _logger = logger;
@@ -59,9 +59,9 @@ namespace AircraftMRO.Services
             int totalItems = await query.CountAsync();
 
             var items = await query
-                .OrderBy(a => a.Id)
-                .Skip((filter.PageNumber - 1) * filter.PageSize)
-                .Take(filter.PageSize)
+                .OrderByDescending(a => a.Id)
+                .Skip((filter.PageNumber - 1) * filter.PageSize) // ignore the first X
+                .Take(filter.PageSize) // Getting only X records
                 .Select(a => new AircraftListViewModel
                 {
                     Id = a.Id,
@@ -72,7 +72,7 @@ namespace AircraftMRO.Services
                     TotalFlightHours = a.TotalFlightHours,
 
                     MaintenanceCount = a.WorkOrders
-                        .SelectMany(w => w.MaintenanceRecords)
+                        .SelectMany(w => w.MaintenanceRecords) // SelectMany Flat result of the query, all items in on list
                         .Count(),
 
                     WorkOrderCount = a.WorkOrders.Count(),
@@ -113,8 +113,20 @@ namespace AircraftMRO.Services
                             UpdatedBy = a.UpdatedByUser != null ? a.UpdatedByUser.FullName : null,
                             DeletedAtUtc = a.DeletedAtUtc,
                             DeletedBy = a.DeletedByUser != null ? a.DeletedByUser.FullName : null,
-
-                            LightMaintenanceRecords = a.WorkOrders
+                            // Collection 
+                            LightWorkOrders = a.WorkOrders // TODO : Add a further condition to get accurate required WorkOrders 
+                                .OrderByDescending(o => o.Id)
+                                .Take(30)
+                                .Select(o => new WorkOrderLightViewModel
+                                {
+                                    Id = o.Id,
+                                    Priority = o.Priority,
+                                    Status = o.Status,
+                                    IsDeleted = o.IsDeleted
+                                })
+                                .ToList(),
+                            // Collection 
+                            LightMaintenanceRecords = a.WorkOrders // TODO : Add a further condition to get accurate required MaintenanceRecords 
                                 .SelectMany(w => w.MaintenanceRecords)
                                 .OrderByDescending(m => m.Id)
                                 .Take(30)
@@ -127,19 +139,7 @@ namespace AircraftMRO.Services
                                     IsDeleted = m.IsDeleted
                                 })
                                 .ToList(),
-
-                            LightWorkOrders = a.WorkOrders
-                                .OrderByDescending(o => o.Id)
-                                .Take(30)
-                                .Select(o => new WorkOrderLightViewModel
-                                {
-                                    Id = o.Id,
-                                    Priority = o.Priority,
-                                    Status = o.Status,
-                                    IsDeleted = o.IsDeleted
-                                })
-                                .ToList(),
-
+                            // Collection 
                             LightAlerts = a.Alerts
                                 .OrderByDescending(l => l.Id)
                                 .Take(30)
@@ -153,7 +153,7 @@ namespace AircraftMRO.Services
 
 
                         })
-                        .FirstOrDefaultAsync();
+                        .FirstOrDefaultAsync(); // First or Null 
 
                 if (aircraftDetails == null)
                 {
@@ -214,6 +214,7 @@ namespace AircraftMRO.Services
                     Data = aircraft
                 };
             }
+            // Db Speicify 
             catch (DbUpdateException ex)
             {
                 if (ex.InnerException is PostgresException postgresEx)
@@ -251,6 +252,7 @@ namespace AircraftMRO.Services
                     ErrorMessage = "Database update failed."
                 };
             }
+            // General Catch
             catch (Exception ex)
             {
                 _logger.LogError(

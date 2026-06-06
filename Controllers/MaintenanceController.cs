@@ -59,6 +59,7 @@ namespace AircraftMRO.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(MaintenanceCreateViewModel viewModel)
         {
+            Console.WriteLine(viewModel.ScheduledDate.Kind);
             if (!ModelState.IsValid)
             {
                 viewModel = await _maintenanceService.PopulateCreateViewModelAsync(viewModel);

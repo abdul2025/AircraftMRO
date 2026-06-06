@@ -13,13 +13,16 @@ using Microsoft.AspNetCore.Identity;
 using AircraftMRO.Infrastructure.Identity.Entities;
 using AircraftMRO.Infrastructure.Identity.Seeders;
 using Microsoft.AspNetCore.Authorization;
+using AircraftMRO.Infrastructure.Hangfire;
+using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
+using AircraftMRO.Infrastructure.Identity.Services;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
-    .WriteTo.Console()
+    .WriteTo.Console(outputTemplate:"[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .WriteTo.File("logs/app.log")
     .CreateLogger();
 
@@ -46,6 +49,7 @@ builder.Services.AddHangfire(config =>
         options.UseNpgsqlConnection(
             builder.Configuration.GetConnectionString("DefaultConnection")));
 });
+// Start Worker
 builder.Services.AddHangfireServer();
 
 
@@ -54,15 +58,27 @@ builder.Services.AddControllersWithViews();
 
 
 // START New Registry of any services
-builder.Services.AddSingleton<IAppLogger, CustomAppLogger>();
-builder.Services.AddScoped<IAircraftService, AircraftService>();
+// This to handle the generic Log instance, controller , services ...etc.
+builder.Services.AddScoped(typeof(IAppLogger<>), typeof(CustomAppLogger<>));
 // This to handle the generic assigning of model as per each initiate for the BaseRepo
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
+// Domain and Business 
+builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 builder.Services.AddScoped<IAircraftStatusService, AircraftStatusService>();
 
+// Background Jobs
 builder.Services.AddScoped<AlertJobsService>();
+
+// Audit entity Globally 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+
+// IDENTIFY Service 
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 // END New Registry of any services
 
@@ -88,7 +104,7 @@ builder.Services
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login"; // Redirect for if not logged in
-    options.AccessDeniedPath = "/Error/403"; // Redirect for lacks permission 
+    options.AccessDeniedPath = "/Error/403"; // Redirect for lacks permission TODO can Create a dedicated AccessDenied PAGE
 });
 // Global Authorization
 builder.Services.AddControllersWithViews(options =>
@@ -101,14 +117,6 @@ builder.Services.AddControllersWithViews(options =>
 });
 
 
-// For Audit Action for all abstracted entity of AuditableEntity
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-
-
-
 
 var app = builder.Build();
 
@@ -119,7 +127,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-// Register recurring jobs
+// Register recurring Hangfire jobs and their schedules.
 using (var scope = app.Services.CreateScope())
 {
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
@@ -157,9 +165,14 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-
-
-app.UseHangfireDashboard("/hangfire");
+// Routing for the hangfire and Authorization
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization =
+    [
+        new HangfireAuthorizationFilter()
+    ]
+});
 
 app.MapControllerRoute(
     name: "default",

@@ -8,11 +8,11 @@ namespace AircraftMRO.Services
 {
     public class AircraftStatusService : IAircraftStatusService
     {
-        private readonly IAppLogger _logger;
+        private readonly IAppLogger<AircraftStatusService> _logger;
         private readonly ApplicationDbContext _context;
 
 
-        public AircraftStatusService(IAppLogger logger, ApplicationDbContext context)
+        public AircraftStatusService(IAppLogger<AircraftStatusService> logger, ApplicationDbContext context)
         {
             _logger = logger;
             _context = context;
@@ -77,20 +77,20 @@ namespace AircraftMRO.Services
         */
         public void UpdateAircraftStatus(Aircraft aircraft, IEnumerable<WorkOrder> workOrders)
         {
+            // Check for Any Open or Inprogress with Critical Priority
             bool hasCritical = workOrders.Any(w =>
                 (w.Status == WorkOrderStatus.Open ||
                  w.Status == WorkOrderStatus.InProgress) &&
                 w.Priority == WorkOrderPriority.Critical);
 
+            // Check for Any Open or InProgress
             bool hasOutstanding = workOrders.Any(w =>
                 w.Status == WorkOrderStatus.Open ||
                 w.Status == WorkOrderStatus.InProgress);
 
-            AircraftStatus newStatus =
-                hasCritical ? AircraftStatus.Grounded : hasOutstanding ? AircraftStatus.Maintenance : AircraftStatus.Active;
+            AircraftStatus newStatus = hasCritical ? AircraftStatus.Grounded : hasOutstanding ? AircraftStatus.Maintenance : AircraftStatus.Active;
 
-            _logger.LogInfo(
-                "Aircraft status check",
+            _logger.LogInfo("Aircraft status check",
                 new
                 {
                     AircraftId = aircraft.Id,
@@ -103,8 +103,7 @@ namespace AircraftMRO.Services
             {
                 aircraft.Status = newStatus;
 
-                _logger.LogInfo(
-                    "Aircraft status recalculated.",
+                _logger.LogInfo("Aircraft status recalculated.",
                     new
                     {
                         AircraftId = aircraft.Id,
@@ -112,6 +111,11 @@ namespace AircraftMRO.Services
                         NewStatus = newStatus
                     });
             }
+
+
+
+
+            // ******************* ******************* ******************* *******************
 
             // Resolve active Alerts for Aircraft Back to Active from Grounded. //TODO: THIS SHOULD BE IN ANOTHER SERVICE as Resolve Alerts Service
             if (previousStatus == AircraftStatus.Grounded && newStatus != AircraftStatus.Grounded)
@@ -127,8 +131,7 @@ namespace AircraftMRO.Services
                 {
                     alert.ResolvedAt = DateTime.UtcNow;
 
-                    _logger.LogInfo(
-                        "alert Resolved",
+                    _logger.LogInfo("alert Resolved",
                     new
                     {
                         Alert = alert.Id,

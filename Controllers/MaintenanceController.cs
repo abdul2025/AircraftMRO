@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Results;
+using AircraftMRO.Infrastructure.Identity.Constants;
 using AircraftMRO.Models;
 using AircraftMRO.Models.ViewModels.MaintenanceRecord;
 using AircraftMRO.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -33,6 +35,7 @@ namespace AircraftMRO.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Details(int id)
         {
             MaintenanceRecordDetailsViewModel? model = await _maintenanceService.GetMaintenanceRecordDetailsAsync(id);
@@ -48,6 +51,7 @@ namespace AircraftMRO.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Create()
         {
             MaintenanceCreateViewModel viewModel = await _maintenanceService.GetCreateViewModelAsync();
@@ -57,6 +61,7 @@ namespace AircraftMRO.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Create(MaintenanceCreateViewModel viewModel)
         {
             Console.WriteLine(viewModel.ScheduledDate.Kind);
@@ -84,6 +89,8 @@ namespace AircraftMRO.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
+
         public async Task<IActionResult> Edit(int id)
         {
             MaintenanceEditViewModel? viewModel =
@@ -99,6 +106,7 @@ namespace AircraftMRO.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Edit(MaintenanceEditViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -121,6 +129,7 @@ namespace AircraftMRO.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Delete(int id)
         {
             MaintenanceDeleteViewModel? viewModel = await _maintenanceService.GetDeleteViewModelAsync(id);
@@ -136,6 +145,7 @@ namespace AircraftMRO.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             ServiceResult<MaintenanceRecord> result = await _maintenanceService.DeleteMaintenanceRecordAsync(id);
@@ -150,6 +160,7 @@ namespace AircraftMRO.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Complete(int id)
         {
             MaintenanceDeleteViewModel? viewModel = await _maintenanceService.GetDeleteViewModelAsync(id);
@@ -162,7 +173,7 @@ namespace AircraftMRO.Controllers
             return PartialView("_Complete", viewModel);
         }
 
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteConfirmed(int id)

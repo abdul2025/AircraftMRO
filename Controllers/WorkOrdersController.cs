@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Results;
+using AircraftMRO.Infrastructure.Identity.Constants;
 using AircraftMRO.Models;
 using AircraftMRO.Models.Enums;
 using AircraftMRO.Models.ViewModels.WorkOrder;
 using AircraftMRO.Repositories;
 using AircraftMRO.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -35,7 +37,7 @@ namespace AircraftMRO.Controllers
 
             return View(workOrders);
         }
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Details(int id)
         {
             var result = await _workOrderService.GetDetailsAsync(id);
@@ -47,7 +49,8 @@ namespace AircraftMRO.Controllers
 
             return View(result.Data);
         }
-
+        
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Create()
         {
             var model = await _workOrderService.GetCreateViewAsync();
@@ -57,6 +60,7 @@ namespace AircraftMRO.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Create(WorkOrderCreateViewModel model)
         {
             if (!ModelState.IsValid)
@@ -82,7 +86,7 @@ namespace AircraftMRO.Controllers
         }
 
 
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -96,7 +100,7 @@ namespace AircraftMRO.Controllers
             return PartialView("_Edit", result.Data);
         }
 
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(WorkOrderEditViewModel model)
@@ -120,7 +124,7 @@ namespace AircraftMRO.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _workOrderService.GetDeleteViewAsync(id);
@@ -135,6 +139,7 @@ namespace AircraftMRO.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var result = await _workOrderService.DeleteAsync(id);

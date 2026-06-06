@@ -15,7 +15,9 @@ namespace AircraftMRO.Infrastructure.Hangfire
             // Console.WriteLine(httpContext.User.IsInRole(Roles.Admin));
             // Console.WriteLine(httpContext.User.Identity.IsAuthenticated);
 
-            return httpContext.User.Identity?.IsAuthenticated == true && httpContext.User.IsInRole(Roles.Admin);
+            var user = httpContext.User;
+
+            return user.Identity?.IsAuthenticated == true && user.IsInRole(Roles.Admin);
         }
     }
 }

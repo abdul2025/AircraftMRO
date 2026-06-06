@@ -14,10 +14,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function openCrudModal(url) {
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    });
+    if (response.status === 401) {
+
+        window.location.href = '/Account/Login';
+        return;
+    }
+
+    if (response.status === 403) {
+        notify.error('Access denied.');
+        return;
+    }
 
     if (!response.ok) {
-        alert('Failed to load modal.');
+        notify.error('Failed to load modal.');
         return;
     }
 
@@ -129,31 +141,22 @@ function bindCrudForm() {
 
         try {
 
-            const formData =
-                new FormData(form);
-
-            const response =
-                await fetch(form.action, {
-                    method: form.method,
-                    body: formData
-                });
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {method: form.method, body: formData});
 
             if (response.redirected) {
                 window.location.href = response.url;
                 return;
             }
 
-            const html =
-                await response.text();
+            const html =await response.text();
 
             document.getElementById('crudModalContent').innerHTML = html;
 
-            initializeTomSelect(
-                document.getElementById('crudModalContent')
+            initializeTomSelect(document.getElementById('crudModalContent')
             );
 
-            initializePasswordToggle(
-                document.getElementById('crudModalContent')
+            initializePasswordToggle(document.getElementById('crudModalContent')
             );
 
             initializeValidation();
@@ -164,7 +167,7 @@ function bindCrudForm() {
 
             console.error(error);
 
-            alert('An unexpected error occurred.');
+            notify.error('An unexpected error occurred.');
         }
     });
 }

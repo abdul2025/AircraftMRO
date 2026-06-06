@@ -1,6 +1,8 @@
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Infrastructure.Data;
+using AircraftMRO.Infrastructure.Identity.Constants;
 using AircraftMRO.Models.ViewModels.Alert;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +16,8 @@ namespace AircraftMRO.Controllers
         {
             _context = context;
         }
-
+        
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Index(
             string? search,
             bool? resolved,

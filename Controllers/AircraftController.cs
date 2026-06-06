@@ -1,9 +1,11 @@
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Results;
+using AircraftMRO.Infrastructure.Identity.Constants;
 using AircraftMRO.Models;
 using AircraftMRO.Models.ViewModels.Aircraft;
 using AircraftMRO.Repositories;
 using AircraftMRO.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AircraftMRO.Controllers
@@ -26,6 +28,8 @@ namespace AircraftMRO.Controllers
             return View(aircrafts);
         }
 
+        
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Details(int id)
         {
             ServiceResult<AircraftDetailsViewModel> result = await _aircraftService.GetAircraftDetailsAsync(id);
@@ -38,12 +42,15 @@ namespace AircraftMRO.Controllers
             return View(result.Data);
         }
 
+
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
         public IActionResult Create()
         {
             return PartialView("_Create", new AircraftCreateViewModel());
         }
 
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AircraftCreateViewModel viewModel)
@@ -67,6 +74,9 @@ namespace AircraftMRO.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -87,7 +97,7 @@ namespace AircraftMRO.Controllers
 
             return PartialView("_Edit", viewModel);
         }
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(AircraftEditViewModel viewModel)
@@ -111,7 +121,7 @@ namespace AircraftMRO.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -131,7 +141,7 @@ namespace AircraftMRO.Controllers
 
             return PartialView("_Delete", viewModel);
         }
-
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

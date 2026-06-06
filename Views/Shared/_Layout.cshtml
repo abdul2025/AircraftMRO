@@ -1,4 +1,6 @@
 ﻿@using AircraftMRO.Infrastructure.Identity.Constants
+@using AircraftMRO.Common.Extensions
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,6 +19,27 @@
     <link rel="stylesheet" href="~/AircraftMRO.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 </head>
+<div class="toast-container position-fixed top-0 end-0 p-3">
+
+    <div id="appToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+
+        <div class="toast-header">
+
+            <strong id="toastTitle" class="me-auto">
+                Notification
+            </strong>
+
+            <button type="button" class="btn-close" data-bs-dismiss="toast">
+            </button>
+
+        </div>
+
+        <div id="toastBody" class="toast-body">
+        </div>
+
+    </div>
+
+</div>
 
 <body>
 
@@ -54,7 +77,7 @@
 
                                     <span class="nav-link">
                                         <i class="bi bi-person-circle fs-5 me-1"></i>
-                                        @User.Identity?.Name
+                                        @User.Identity?.Name - Role: @User.GetRoles()
                                     </span>
                                 </a>
 
@@ -62,20 +85,13 @@
                             @if (User.IsInRole(Roles.Admin))
                             {
                                 <li class="nav-item">
-                                    <button class="btn btn-sm me-2 mt-3 btn-based btn-outline-secondary" onclick="openCrudModal('/Account/Create')">
+                                    <button class="btn btn-sm me-2 mt-3 btn-based btn-outline-secondary"
+                                            onclick="openCrudModal('/Account/Create')">
 
                                         <i class="bi bi-person-plus"></i>
                                         Create User
 
                                     </button>
-                                    @* <a href="javascript:void(0)" onclick="openCrudModal('@Url.Action("Create", "Account")')"
-                                       class="btn btn-sm btn-outline-secondary me-2 mt-3">
-
-                                        <i class="bi bi-person-plus"></i>
-                                        Create User
-
-                                    </a> *@
-
                                 </li>
                             }
 
@@ -252,6 +268,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/error.js"></script>
     <script src="~/js/crud-modal.js"></script>
+    <script src="~/js/notifications.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     @* // Allow using JS and CSS globally over the prject *@

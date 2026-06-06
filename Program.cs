@@ -100,11 +100,37 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Redirection for unauth and unauthenticated 
+// config and path 
+// config header and status for unauth and unauthenticate, where JS fetch will handle it.
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // Redirect for if not logged in
-    options.AccessDeniedPath = "/Error/403"; // Redirect for lacks permission TODO can Create a dedicated AccessDenied PAGE
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Error/403";
+
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            context.Response.StatusCode = 403;
+            return Task.CompletedTask;
+        }
+
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        }
+
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 });
 // Global Authorization
 builder.Services.AddControllersWithViews(options =>

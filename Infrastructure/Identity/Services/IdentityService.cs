@@ -26,9 +26,7 @@ public class IdentityService : IIdentityService
 
         if (!result.Succeeded)
         {
-            _logger.LogWarning(
-                "Authentication failed",
-                new { Email = email });
+            _logger.LogWarning("Authentication failed", new { Email = email });
 
             return new AuthResult
             {
@@ -46,8 +44,7 @@ public class IdentityService : IIdentityService
             await _userManager.UpdateAsync(user);
         }
 
-        _logger.LogInfo(
-            "User authenticated successfully",
+        _logger.LogInfo("User authenticated successfully",
             new
             {
                 UserId = user?.Id,
@@ -92,18 +89,14 @@ public class IdentityService : IIdentityService
             };
         }
 
-        var createResult = await _userManager.CreateAsync(
-            user,
-            request.Password);
+        var createResult = await _userManager.CreateAsync(user, request.Password);
 
         if (!createResult.Succeeded)
         {
             return new ServiceResult<CreateUserResult>
             {
                 Success = false,
-                ErrorMessage = string.Join(
-                    Environment.NewLine,
-                    createResult.Errors.Select(e => e.Description))
+                ErrorMessage = string.Join(Environment.NewLine, createResult.Errors.Select(e => e.Description))
             };
         }
 

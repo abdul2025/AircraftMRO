@@ -258,6 +258,9 @@
 
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
@@ -269,7 +272,6 @@
     <script src="~/js/error.js"></script>
     <script src="~/js/crud-modal.js"></script>
     <script src="~/js/notifications.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     @* // Allow using JS and CSS globally over the prject *@
     @await RenderSectionAsync("Scripts", required: false)

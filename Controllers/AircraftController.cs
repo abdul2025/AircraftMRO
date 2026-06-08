@@ -43,16 +43,16 @@ namespace AircraftMRO.Controllers
         }
 
 
-        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public IActionResult Create()
         {
             return PartialView("_Create", new AircraftCreateViewModel());
         }
 
-        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Create(AircraftCreateViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -76,8 +76,8 @@ namespace AircraftMRO.Controllers
 
 
 
-        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Edit(int id)
         {
             Aircraft? aircraft = await _repository.GetByIdAsync(id);
@@ -97,9 +97,9 @@ namespace AircraftMRO.Controllers
 
             return PartialView("_Edit", viewModel);
         }
-        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Edit(AircraftEditViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -121,8 +121,8 @@ namespace AircraftMRO.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Delete(int id)
         {
             Aircraft? aircraft = await _repository.GetByIdAsync(id);
@@ -141,9 +141,9 @@ namespace AircraftMRO.Controllers
 
             return PartialView("_Delete", viewModel);
         }
-        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             Aircraft? aircraft = await _repository.GetByIdAsync(id);

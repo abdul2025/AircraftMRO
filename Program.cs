@@ -16,6 +16,11 @@ using Microsoft.AspNetCore.Authorization;
 using AircraftMRO.Infrastructure.Hangfire;
 using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
 using AircraftMRO.Infrastructure.Identity.Services;
+using AircraftMRO.Services.Interfaces.INotification;
+using System.Net.Mail;
+using FluentEmail.Core;
+using AircraftMRO.Services.Interfaces.Notification;
+using AircraftMRO.Infrastructure.Services;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -32,29 +37,41 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
 
-
-
-
-
 // DB Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 // Hangfire
 builder.Services.AddHangfire(config =>
 {
     config.UsePostgreSqlStorage(options =>
-        options.UseNpgsqlConnection(
-            builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
 });
-// Start Worker
+// Start Hangfire Worker
 builder.Services.AddHangfireServer();
 
 
-// MVC 
-builder.Services.AddControllersWithViews();
+// Global Authorization
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(policy));
+});
+
+
+// 1. Build SMTP client settings from configuration
+var smtpHost = builder.Configuration["EmailSettings:Host"] ?? "localhost";
+var smtpPort = int.Parse(builder.Configuration["EmailSettings:Port"] ?? "25");
+var fromEmail = builder.Configuration["EmailSettings:FromEmail"] ?? "no-reply@aircraftmro.com";
+
+// 2. Wire up FluentEmail with the SMTP Sender package
+builder.Services.AddFluentEmail(fromEmail).AddSmtpSender(new SmtpClient(smtpHost, smtpPort));
+
+builder.Services.AddSignalR();
 
 
 // START New Registry of any services
@@ -80,6 +97,18 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 // IDENTIFY Service 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 
+// Email Service
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+
+// Core Application Email bridge driver
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+
+// Dispatcher automatically injects this list
+builder.Services.AddScoped<INotificationChannel, RealTimeInAppChannel>();
+builder.Services.AddScoped<INotificationChannel, EmailNotificationChannel>();
+
+// Register the Central Engine Coordinator Dispatcher
+builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 // END New Registry of any services
 
 
@@ -101,7 +130,7 @@ builder.Services
     .AddDefaultTokenProviders();
 
 // config and path 
-// config header and status for unauth and unauthenticate, where JS fetch will handle it.
+// config header and status for unauth and unauthenticated, where JS fetch will handle it.
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -132,15 +161,7 @@ builder.Services.ConfigureApplicationCookie(options =>
         return Task.CompletedTask;
     };
 });
-// Global Authorization
-builder.Services.AddControllersWithViews(options =>
-{
-    var policy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
 
-    options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(policy));
-});
 
 
 
@@ -190,6 +211,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+
+// Map your SignalR Notification WebSockets endpoint 
+app.MapHub<NotificationHub>("/notificationHub");
 
 // Routing for the hangfire and Authorization
 app.UseHangfireDashboard("/hangfire", new DashboardOptions

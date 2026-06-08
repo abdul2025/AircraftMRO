@@ -22,10 +22,13 @@ namespace AircraftMRO.Infrastructure.Data
         //*** For any save action AuditableEntity will be created with the associated CRUD entity ***
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            // trigger Audit function every time there is a save action
             ApplyAuditInformation();
 
             return await base.SaveChangesAsync(cancellationToken);
         }
+
+        // Handle Audit Per Each entity and its DB CRUD
         private void ApplyAuditInformation()
         {
             string? userId = _currentUserService.UserId;
@@ -65,6 +68,11 @@ namespace AircraftMRO.Infrastructure.Data
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
+
+
+
+            // Automatically filter out soft-deleted entities across the entire application, TODO: if this required we can implement Dynamic Global Query Filters for Abstract Classes --> (AuditableEntity)
+            // modelBuilder.Entity<Aircraft>().HasQueryFilter(a => !a.IsDeleted);
         }
 
 
@@ -73,6 +81,9 @@ namespace AircraftMRO.Infrastructure.Data
         public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();
         public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
         public DbSet<Alert> Alerts => Set<Alert>();
+        public DbSet<Notification> Notifications => Set<Notification>();
+
+        
 
     }
 }

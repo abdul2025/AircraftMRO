@@ -11,10 +11,7 @@ namespace AircraftMRO.Infrastructure.Identity.Seeders
     {
         public static async Task SeedRolesAsync(IServiceProvider serviceProvider)
         {
-            using var scope = serviceProvider.CreateScope();
-
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             foreach (var role in Roles.All)
             {
                 if (!await roleManager.RoleExistsAsync(role))

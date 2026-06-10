@@ -1,5 +1,7 @@
 @using AircraftMRO.Common.Pagination
 @using AircraftMRO.Models.ViewModels.Alert
+@using AircraftMRO.Domain.Enums
+
 
 @model PagedResult<AlertListViewModel>
 
@@ -147,13 +149,13 @@
 
                                         @switch (item.Severity)
                                         {
-                                            case AircraftMRO.Models.Enums.AlertSeverity.Critical:
+                                            case AlertSeverity.Critical:
                                                 <span class="badge bg-danger">
                                                     Critical
                                                 </span>
                                                 break;
 
-                                            case AircraftMRO.Models.Enums.AlertSeverity.Warning:
+                                            case AlertSeverity.Warning:
                                                 <span class="badge bg-warning text-dark">
                                                     Warning
                                                 </span>

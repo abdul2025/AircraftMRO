@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AircraftMRO.Models;
+using AircraftMRO.Domain;
 
 namespace AircraftMRO.Services.Interfaces
 {

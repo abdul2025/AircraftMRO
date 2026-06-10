@@ -16,11 +16,6 @@ using Microsoft.AspNetCore.Authorization;
 using AircraftMRO.Infrastructure.Hangfire;
 using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
 using AircraftMRO.Infrastructure.Identity.Services;
-using AircraftMRO.Services.Interfaces.INotification;
-using System.Net.Mail;
-using FluentEmail.Core;
-using AircraftMRO.Services.Interfaces.Notification;
-using AircraftMRO.Infrastructure.Services;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -63,13 +58,7 @@ builder.Services.AddControllersWithViews(options =>
 });
 
 
-// 1. Build SMTP client settings from configuration
-var smtpHost = builder.Configuration["EmailSettings:Host"] ?? "localhost";
-var smtpPort = int.Parse(builder.Configuration["EmailSettings:Port"] ?? "25");
-var fromEmail = builder.Configuration["EmailSettings:FromEmail"] ?? "no-reply@aircraftmro.com";
 
-// 2. Wire up FluentEmail with the SMTP Sender package
-builder.Services.AddFluentEmail(fromEmail).AddSmtpSender(new SmtpClient(smtpHost, smtpPort));
 
 builder.Services.AddSignalR();
 
@@ -97,18 +86,8 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 // IDENTIFY Service 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 
-// Email Service
-builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
-// Core Application Email bridge driver
-builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
-// Dispatcher automatically injects this list
-builder.Services.AddScoped<INotificationChannel, RealTimeInAppChannel>();
-builder.Services.AddScoped<INotificationChannel, EmailNotificationChannel>();
-
-// Register the Central Engine Coordinator Dispatcher
-builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 // END New Registry of any services
 
 
@@ -213,8 +192,7 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 
-// Map your SignalR Notification WebSockets endpoint 
-app.MapHub<NotificationHub>("/notificationHub");
+
 
 // Routing for the hangfire and Authorization
 app.UseHangfireDashboard("/hangfire", new DashboardOptions

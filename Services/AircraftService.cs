@@ -8,7 +8,7 @@ using AircraftMRO.Models.ViewModels.MaintenanceRecord;
 using AircraftMRO.Models.ViewModels.WorkOrder;
 using AircraftMRO.Models.ViewModels.Alert;
 using AircraftMRO.Common.Results;
-using AircraftMRO.Models;
+using AircraftMRO.Domain;
 using AircraftMRO.Repositories;
 using Npgsql;
 using AircraftMRO.Common.Pagination;

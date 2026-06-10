@@ -1,6 +1,6 @@
 using AircraftMRO.Infrastructure.Data;
-using AircraftMRO.Models;
-using AircraftMRO.Models.Enums;
+using AircraftMRO.Domain;
+using AircraftMRO.Domain.Enums;
 using AircraftMRO.Services.Interfaces;
 using SharedKernel.Logging.Interfaces;
 

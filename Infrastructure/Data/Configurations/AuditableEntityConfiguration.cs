@@ -1,5 +1,5 @@
 using AircraftMRO.Infrastructure.Identity.Entities;
-using AircraftMRO.Models.Entities;
+using AircraftMRO.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AircraftMRO.Infrastructure.Data.Configurations

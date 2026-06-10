@@ -1,7 +1,7 @@
 
 using AircraftMRO.Infrastructure.Identity.Entities;
-using AircraftMRO.Models;
-using AircraftMRO.Models.Entities;
+using AircraftMRO.Domain;
+using AircraftMRO.Domain.Entities;
 using AircraftMRO.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -81,7 +81,6 @@ namespace AircraftMRO.Infrastructure.Data
         public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();
         public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
         public DbSet<Alert> Alerts => Set<Alert>();
-        public DbSet<Notification> Notifications => Set<Notification>();
 
         
 

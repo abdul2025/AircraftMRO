@@ -1,4 +1,4 @@
-using AircraftMRO.Models;
+using AircraftMRO.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

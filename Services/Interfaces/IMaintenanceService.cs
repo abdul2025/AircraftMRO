@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Results;
-using AircraftMRO.Models;
+using AircraftMRO.Domain;
 using AircraftMRO.Models.ViewModels.MaintenanceRecord;
 
 namespace AircraftMRO.Services.Interfaces

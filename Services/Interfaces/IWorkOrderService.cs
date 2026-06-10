@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Results;
-using AircraftMRO.Models;
+using AircraftMRO.Domain;
 using AircraftMRO.Models.ViewModels.WorkOrder;
 
 namespace AircraftMRO.Services.Interfaces

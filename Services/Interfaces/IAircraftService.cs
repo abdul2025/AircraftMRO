@@ -2,7 +2,7 @@
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Results;
-using AircraftMRO.Models;
+using AircraftMRO.Domain;
 using AircraftMRO.Models.ViewModels;
 using AircraftMRO.Models.ViewModels.Aircraft;
 

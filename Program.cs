@@ -8,7 +8,6 @@ using AircraftMRO.Services.Interfaces;
 using AircraftMRO.Repositories;
 using Hangfire;
 using Hangfire.PostgreSql;
-using AircraftMRO.BackgroundJobs;
 using Microsoft.AspNetCore.Identity;
 using AircraftMRO.Infrastructure.Identity.Entities;
 using AircraftMRO.Infrastructure.Identity.Seeders;
@@ -16,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using AircraftMRO.Infrastructure.Hangfire;
 using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
 using AircraftMRO.Infrastructure.Identity.Services;
+using AircraftMRO.Infrastructure.BackgroundJobs;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()

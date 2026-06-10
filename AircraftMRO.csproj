@@ -26,4 +26,6 @@
     <ProjectReference Include="..\SharedLibraries\SharedKernel.Logging\SharedKernel.Logging.csproj" />
   </ItemGroup>
 
+  
+
 </Project>

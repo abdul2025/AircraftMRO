@@ -16,6 +16,9 @@ using AircraftMRO.Infrastructure.Hangfire;
 using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
 using AircraftMRO.Infrastructure.Identity.Services;
 using AircraftMRO.Infrastructure.BackgroundJobs;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using AircraftMRO.Application.DTOs.Aircraft.Validators;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -28,8 +31,14 @@ Log.Logger = new LoggerConfiguration()
 
 // Application Configuration Builder
 var builder = WebApplication.CreateBuilder(args);
-
+// Serilog
 builder.Host.UseSerilog();
+
+
+
+
+
+
 
 
 // DB Configuration
@@ -57,6 +66,11 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(policy));
 });
 
+// FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<AircraftCreateDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AircraftEditDtoValidator>();
 
 
 

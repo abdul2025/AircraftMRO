@@ -7,6 +7,8 @@ using AircraftMRO.Repositories;
 using AircraftMRO.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AircraftMRO.Application.DTOs.Aircraft;
+using AircraftMRO.Web.Mvc.Mappings;
 
 namespace AircraftMRO.Controllers
 {
@@ -21,6 +23,10 @@ namespace AircraftMRO.Controllers
             _repository = repository;
         }
 
+        //
+        //   View
+        //
+
         public async Task<IActionResult> Index(AircraftFilter filter)
         {
             var aircrafts = await _aircraftService.GetAircraftAsync(filter);
@@ -28,137 +34,138 @@ namespace AircraftMRO.Controllers
             return View(aircrafts);
         }
 
-        
+
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Details(int id)
         {
-            ServiceResult<AircraftDetailsViewModel> result = await _aircraftService.GetAircraftDetailsAsync(id);
+            ServiceResult<AircraftDetailsDto> result = await _aircraftService.GetAircraftDetailsAsync(id);
 
-            if (!result.Success)
+            if (!result.Success || result.Data == null)
             {
                 return NotFound();
             }
 
-            return View(result.Data);
+            var vm = AircraftMappings.ToVm(result.Data);
+
+            return View(vm);
         }
 
 
+        //
+        //   Create
+        //
         [HttpGet]
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public IActionResult Create()
         {
-            return PartialView("_Create", new AircraftCreateViewModel());
+            return PartialView("_Create", new AircraftCreateDto());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
-        public async Task<IActionResult> Create(AircraftCreateViewModel viewModel)
+        public async Task<IActionResult> Create(AircraftCreateDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return PartialView("_Create", viewModel);
-            }
-
-            ServiceResult<Aircraft> result = await _aircraftService.CreateAircraftAsync(viewModel);
+            var result = await _aircraftService.CreateAircraftAsync(dto);
 
             if (!result.Success)
             {
-                ModelState.AddModelError(
-                    nameof(viewModel.TailNumber),
-                    result.ErrorMessage!);
+                if (result.ValidationErrors != null)
+                {
+                    foreach (var error in result.ValidationErrors)
+                    {
+                        foreach (var msg in error.Value)
+                        {
+                            ModelState.AddModelError(error.Key, msg);
+                        }
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", result.ErrorMessage!);
+                }
 
-                return PartialView("_Create", viewModel);
+                return PartialView("_Create", dto);
             }
 
             return RedirectToAction(nameof(Index));
         }
 
 
-
+        //
+        //   EDIT
+        //
         [HttpGet]
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Edit(int id)
         {
-            Aircraft? aircraft = await _repository.GetByIdAsync(id);
+            var result = await _aircraftService.GetForEditAsync(id);
 
-            if (aircraft == null)
-            {
+            if (!result.Success || result.Data == null)
                 return NotFound();
-            }
 
-            AircraftEditViewModel viewModel = new()
-            {
-                Id = aircraft.Id,
-                TailNumber = aircraft.TailNumber,
-                Model = aircraft.Model,
-                Manufacturer = aircraft.Manufacturer
-            };
-
-            return PartialView("_Edit", viewModel);
+            return PartialView("_Edit", result.Data);
         }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
-        public async Task<IActionResult> Edit(AircraftEditViewModel viewModel)
+        public async Task<IActionResult> Edit(AircraftEditDto dto)
         {
-            if (!ModelState.IsValid)
+            var result = await _aircraftService.UpdateAsync(dto);
+
+            if (!result.Success)
             {
-                return PartialView("_Edit", viewModel);
+                if (result.ValidationErrors != null)
+                {
+                    foreach (var error in result.ValidationErrors)
+                    {
+                        foreach (var msg in error.Value)
+                        {
+                            ModelState.AddModelError(error.Key, msg);
+                        }
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", result.ErrorMessage!);
+                }
+
+                return PartialView("_Edit", dto);
             }
-
-            Aircraft? aircraft = await _repository.GetByIdAsync(viewModel.Id);
-
-            if (aircraft == null)
-            {
-                return NotFound();
-            }
-
-            aircraft.Model = viewModel.Model;
-            aircraft.Manufacturer = viewModel.Manufacturer;
-
-            await _repository.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        //
+        //   DELETE
+        //
         [HttpGet]
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Delete(int id)
         {
-            Aircraft? aircraft = await _repository.GetByIdAsync(id);
+            var result = await _aircraftService.GetForDeleteAsync(id);
 
-            if (aircraft == null)
-            {
+            if (!result.Success || result.Data == null)
                 return NotFound();
-            }
 
-            AircraftDeleteViewModel viewModel = new()
-            {
-                Id = aircraft.Id,
-                TailNumber = aircraft.TailNumber,
-                Model = aircraft.Model
-            };
-
-            return PartialView("_Delete", viewModel);
+            return PartialView("_Delete", result.Data);
         }
 
-
-        // TODO: Move the deleting action to the Applicatiion Service Layer
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            Aircraft? aircraft = await _repository.GetByIdAsync(id);
+            var result = await _aircraftService.DeleteAsync(id);
 
-            if (aircraft == null)
+            if (!result.Success)
             {
+                // optional: you can show error view or toast later
                 return NotFound();
             }
-
-            await _repository.DeleteAsync(aircraft);
-
-            await _repository.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }

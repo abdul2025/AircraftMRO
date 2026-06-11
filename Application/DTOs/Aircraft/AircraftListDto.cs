@@ -1,9 +1,9 @@
 
 using AircraftMRO.Domain.Enums;
 
-namespace AircraftMRO.Mvc.ViewModels.Aircraft
+namespace AircraftMRO.Application.DTOs.Aircraft
 {
-    public class AircraftListViewModel
+    public class AircraftListDto
     {
         public int Id { get; set; }
 
@@ -13,14 +13,16 @@ namespace AircraftMRO.Mvc.ViewModels.Aircraft
 
         public string Manufacturer { get; set; } = string.Empty;
 
-        public AircraftStatus Status { get; set; } = AircraftStatus.Active;
+        public AircraftStatus Status { get; set; }
 
         public int TotalFlightHours { get; set; }
+
         public bool IsDeleted { get; set; }
 
         public int MaintenanceCount { get; set; }
-        public int WorkOrderCount { get; set; }
-        public int AlertCount { get; set; }
 
+        public int WorkOrderCount { get; set; }
+
+        public int AlertCount { get; set; }
     }
 }

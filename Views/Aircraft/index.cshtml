@@ -1,7 +1,7 @@
+@using AircraftMRO.Application.DTOs.Aircraft
 @using AircraftMRO.Common.Pagination
-@using AircraftMRO.Mvc.ViewModels.Aircraft
 
-@model PagedResult<AircraftListViewModel>
+@model PagedResult<AircraftListDto>
 
 @{
     ViewData["Title"] = "Aircraft Fleet";
@@ -130,7 +130,7 @@
 
                         @if (Model.Items != null && Model.Items.Any())
                         {
-                            @foreach (AircraftListViewModel item in Model.Items)
+                            @foreach (AircraftListDto item in Model.Items)
                             {
                                 <tr class="text-center align-middle">
                                     <td class="py-2 based-text text-nowrap">

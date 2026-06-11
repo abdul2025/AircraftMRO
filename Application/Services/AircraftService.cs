@@ -1,17 +1,18 @@
 using AircraftMRO.Infrastructure.Data;
-using AircraftMRO.Mvc.ViewModels.Aircraft;
 using AircraftMRO.Services.Interfaces;
 using SharedKernel.Logging.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using AircraftMRO.Mvc.ViewModels.MaintenanceRecord;
-using AircraftMRO.Mvc.ViewModels.WorkOrder;
 using AircraftMRO.Common.Results;
 using AircraftMRO.Domain;
 using AircraftMRO.Repositories;
 using Npgsql;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Filters;
-using AircraftMRO.Mvc.ViewModels.Alert;
+using AircraftMRO.Application.DTOs.Aircraft;
+using AircraftMRO.Application.DTOs.Alert;
+using AircraftMRO.Application.DTOs.MaintenanceRecord;
+using AircraftMRO.Application.DTOs.WorkOrder;
+using FluentValidation;
 
 
 namespace AircraftMRO.Services
@@ -22,18 +23,23 @@ namespace AircraftMRO.Services
         private readonly ApplicationDbContext _context;
         private readonly IAppLogger<AircraftService> _logger;
         private readonly IBaseRepository<Aircraft> _repository;
+        private readonly IValidator<AircraftEditDto> _editValidator;
+        private readonly IValidator<AircraftCreateDto> _createValidator;
 
 
-        public AircraftService(ApplicationDbContext context, IAppLogger<AircraftService> logger, IBaseRepository<Aircraft> repository)
+        public AircraftService(ApplicationDbContext context, IAppLogger<AircraftService> logger, IBaseRepository<Aircraft> repository, IValidator<AircraftEditDto> editValidator, IValidator<AircraftCreateDto> createValidator)
         {
             _context = context;
             _logger = logger;
             _repository = repository;
+            _editValidator = editValidator;
+            _createValidator = createValidator;
+
         }
 
 
 
-        public async Task<PagedResult<AircraftListViewModel>> GetAircraftAsync(AircraftFilter filter)
+        public async Task<PagedResult<AircraftListDto>> GetAircraftAsync(AircraftFilter filter)
         {
             // IQueryable Making it as query dynamically with filter and where, and happen in db not in memory  
             IQueryable<Aircraft> query = _context.Aircrafts.AsNoTracking(); // Read no need for tracking of changes, less memory usage and faster queries 
@@ -61,7 +67,7 @@ namespace AircraftMRO.Services
                 .OrderByDescending(a => a.Id)
                 .Skip((filter.PageNumber - 1) * filter.PageSize) // ignore the first X
                 .Take(filter.PageSize) // Getting only X records
-                .Select(a => new AircraftListViewModel
+                .Select(a => new AircraftListDto
                 {
                     Id = a.Id,
                     TailNumber = a.TailNumber,
@@ -82,7 +88,7 @@ namespace AircraftMRO.Services
                 })
                 .ToListAsync();
 
-            return new PagedResult<AircraftListViewModel>
+            return new PagedResult<AircraftListDto>
             {
                 Items = items,
                 PageNumber = filter.PageNumber,
@@ -93,15 +99,15 @@ namespace AircraftMRO.Services
 
 
 
-        public async Task<ServiceResult<AircraftDetailsViewModel>> GetAircraftDetailsAsync(int id)
+        public async Task<ServiceResult<AircraftDetailsDto>> GetAircraftDetailsAsync(int id)
         {
             try
             {
-                AircraftDetailsViewModel? aircraftDetails =
+                AircraftDetailsDto? aircraftDetails =
                     await _context.Aircrafts
                         .AsNoTracking() // Read no need for tracking of changes, less memory usage and faster queries 
                         .Where(a => a.Id == id)
-                        .Select(a => new AircraftDetailsViewModel
+                        .Select(a => new AircraftDetailsDto
                         {
                             Id = a.Id,
                             TailNumber = a.TailNumber,
@@ -116,7 +122,7 @@ namespace AircraftMRO.Services
                             LightWorkOrders = a.WorkOrders // TODO : Add a further condition to get accurate required WorkOrders 
                                 .OrderByDescending(o => o.Id)
                                 .Take(30)
-                                .Select(o => new WorkOrderLightViewModel
+                                .Select(o => new WorkOrderLightDto
                                 {
                                     Id = o.Id,
                                     Priority = o.Priority,
@@ -129,7 +135,7 @@ namespace AircraftMRO.Services
                                 .SelectMany(w => w.MaintenanceRecords)
                                 .OrderByDescending(m => m.Id)
                                 .Take(30)
-                                .Select(m => new MaintenanceLightViewModel
+                                .Select(m => new MaintenanceLightDto
                                 {
                                     Id = m.Id,
                                     WorkOrderId = m.WorkOrderId,
@@ -142,7 +148,7 @@ namespace AircraftMRO.Services
                             LightAlerts = a.Alerts
                                 .OrderByDescending(l => l.Id)
                                 .Take(30)
-                                .Select(l => new AlartLightViewModel
+                                .Select(l => new AlertLightDto
                                 {
                                     Id = l.Id,
                                     Severity = l.Severity,
@@ -156,14 +162,14 @@ namespace AircraftMRO.Services
 
                 if (aircraftDetails == null)
                 {
-                    return new ServiceResult<AircraftDetailsViewModel>
+                    return new ServiceResult<AircraftDetailsDto>
                     {
                         Success = false,
                         ErrorMessage = "Aircraft not found."
                     };
                 }
 
-                return new ServiceResult<AircraftDetailsViewModel>
+                return new ServiceResult<AircraftDetailsDto>
                 {
                     Success = true,
                     Data = aircraftDetails
@@ -176,7 +182,7 @@ namespace AircraftMRO.Services
                     ex,
                     new { AircraftId = id });
 
-                return new ServiceResult<AircraftDetailsViewModel>
+                return new ServiceResult<AircraftDetailsDto>
                 {
                     Success = false,
                     ErrorMessage = "Failed to load aircraft details."
@@ -184,55 +190,49 @@ namespace AircraftMRO.Services
             }
         }
 
-        public async Task<ServiceResult<Aircraft>> CreateAircraftAsync(AircraftCreateViewModel viewModel)
+        public async Task<ServiceResult<Aircraft>> CreateAircraftAsync(AircraftCreateDto dto)
         {
             try
             {
+                dto.TailNumber = dto.TailNumber.Trim();
+                dto.Model = dto.Model.Trim();
+                dto.Manufacturer = dto.Manufacturer.Trim();
+
+                var validation = await _createValidator.ValidateAsync(dto);
+
+                if (!validation.IsValid)
+                {
+                    return ServiceResult<Aircraft>.ValidationFailure(
+                        MapErrors(validation));
+                }
+
                 Aircraft aircraft = new()
                 {
-                    TailNumber = viewModel.TailNumber,
-                    Model = viewModel.Model.Trim(),
-                    Manufacturer = viewModel.Manufacturer.Trim()
+                    TailNumber = dto.TailNumber,
+                    Model = dto.Model,
+                    Manufacturer = dto.Manufacturer
                 };
 
                 await _repository.AddAsync(aircraft);
-
                 await _repository.SaveChangesAsync();
 
-                _logger.LogInfo(
-                    "Aircraft created successfully.",
-                    new
-                    {
-                        aircraft.Id,
-                        aircraft.TailNumber
-                    });
-
-                return new ServiceResult<Aircraft>
-                {
-                    Success = true,
-                    Data = aircraft
-                };
+                return ServiceResult<Aircraft>.SuccessResult(aircraft);
             }
-            // Db Speicify 
+            // Database-specific exceptions
             catch (DbUpdateException ex)
             {
-                if (ex.InnerException is PostgresException postgresEx)
+                if (ex.InnerException is PostgresException postgresEx &&
+                    postgresEx.SqlState == PostgresErrorCodes.UniqueViolation)
                 {
-                    if (postgresEx.SqlState == PostgresErrorCodes.UniqueViolation)
-                    {
-                        _logger.LogWarning(
-                            "Attempted to create aircraft with duplicate tail number.",
-                            new
-                            {
-                                viewModel.TailNumber
-                            });
-
-                        return new ServiceResult<Aircraft>
+                    _logger.LogWarning(
+                        "Attempted to create aircraft with duplicate tail number.",
+                        new
                         {
-                            Success = false,
-                            ErrorMessage = "Tail number already exists."
-                        };
-                    }
+                            dto.TailNumber
+                        });
+
+                    return ServiceResult<Aircraft>.Failure(
+                        "Tail number already exists.");
                 }
 
                 _logger.LogError(
@@ -240,18 +240,15 @@ namespace AircraftMRO.Services
                     ex,
                     new
                     {
-                        viewModel.TailNumber,
-                        viewModel.Model,
-                        viewModel.Manufacturer
+                        dto.TailNumber,
+                        dto.Model,
+                        dto.Manufacturer
                     });
 
-                return new ServiceResult<Aircraft>
-                {
-                    Success = false,
-                    ErrorMessage = "Database update failed."
-                };
+                return ServiceResult<Aircraft>.Failure(
+                    "Database update failed.");
             }
-            // General Catch
+            // Unexpected exceptions
             catch (Exception ex)
             {
                 _logger.LogError(
@@ -259,17 +256,124 @@ namespace AircraftMRO.Services
                     ex,
                     new
                     {
-                        viewModel.TailNumber,
-                        viewModel.Model,
-                        viewModel.Manufacturer
+                        dto.TailNumber,
+                        dto.Model,
+                        dto.Manufacturer
                     });
 
+                return ServiceResult<Aircraft>.Failure(
+                    "Failed to create aircraft.");
+            }
+        }
+
+
+
+
+        public async Task<ServiceResult<AircraftEditDto>> GetForEditAsync(int id)
+        {
+            var aircraft = await _repository.GetByIdAsync(id);
+
+            if (aircraft == null)
+            {
+                return new ServiceResult<AircraftEditDto>
+                {
+                    Success = false,
+                    ErrorMessage = "Not found"
+                };
+            }
+
+            return new ServiceResult<AircraftEditDto>
+            {
+                Success = true,
+                Data = new AircraftEditDto
+                {
+                    Id = aircraft.Id,
+                    TailNumber = aircraft.TailNumber,
+                    Model = aircraft.Model,
+                    Manufacturer = aircraft.Manufacturer
+                }
+            };
+        }
+
+        public async Task<ServiceResult<Aircraft>> UpdateAsync(AircraftEditDto dto)
+        {
+            // Implement the validator
+            var validation = await _editValidator.ValidateAsync(dto);
+
+            if (!validation.IsValid)
+            {
+                return ServiceResult<Aircraft>.ValidationFailure(
+                    MapErrors(validation));
+            }
+
+            var aircraft = await _repository.GetByIdAsync(dto.Id);
+
+            if (aircraft == null)
+                return ServiceResult<Aircraft>.Failure("Not found");
+
+            aircraft.Model = dto.Model;
+            aircraft.Manufacturer = dto.Manufacturer;
+
+            await _repository.SaveChangesAsync();
+
+            return ServiceResult<Aircraft>.SuccessResult(aircraft);
+        }
+
+        public async Task<ServiceResult<AircraftDeleteDto>> GetForDeleteAsync(int id)
+        {
+            var aircraft = await _repository.GetByIdAsync(id);
+
+            if (aircraft == null)
+            {
+                return new ServiceResult<AircraftDeleteDto>
+                {
+                    Success = false,
+                    ErrorMessage = "Not found"
+                };
+            }
+
+            return new ServiceResult<AircraftDeleteDto>
+            {
+                Success = true,
+                Data = new AircraftDeleteDto
+                {
+                    Id = aircraft.Id,
+                    TailNumber = aircraft.TailNumber,
+                    Model = aircraft.Model
+                }
+            };
+        }
+
+
+        public async Task<ServiceResult<Aircraft>> DeleteAsync(int id)
+        {
+            var aircraft = await _repository.GetByIdAsync(id);
+
+            if (aircraft == null)
+            {
                 return new ServiceResult<Aircraft>
                 {
                     Success = false,
-                    ErrorMessage = "Failed to create aircraft."
+                    ErrorMessage = "Not found"
                 };
             }
+
+            await _repository.DeleteAsync(aircraft);
+            await _repository.SaveChangesAsync();
+
+            return new ServiceResult<Aircraft> { Success = true };
+        }
+
+
+        // ERROR MAPPING HELPER METHOD
+        private static Dictionary<string, string[]> MapErrors(FluentValidation.Results.ValidationResult result)
+        {
+            return result.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.ErrorMessage).ToArray()
+                );
         }
     }
 }

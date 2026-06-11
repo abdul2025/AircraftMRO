@@ -1,19 +1,14 @@
-using System.ComponentModel.DataAnnotations;
 
-namespace AircraftMRO.Mvc.ViewModels.Aircraft
+namespace AircraftMRO.Application.DTOs.Aircraft
 {
-    public class AircraftEditViewModel
+    public class AircraftEditDto
     {
         public int Id { get; set; }
 
-        [Required]
         public string TailNumber { get; set; } = string.Empty;
 
-        [Required]
         public string Model { get; set; } = string.Empty;
 
-        [Required]
         public string Manufacturer { get; set; } = string.Empty;
-        
     }
 }

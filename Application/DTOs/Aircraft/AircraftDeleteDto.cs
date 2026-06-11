@@ -1,7 +1,7 @@
 
-namespace AircraftMRO.Mvc.ViewModels.Aircraft
+namespace AircraftMRO.Application.DTOs.Aircraft
 {
-    public class AircraftDeleteViewModel
+    public class AircraftDeleteDto
     {
         public int Id { get; set; }
 

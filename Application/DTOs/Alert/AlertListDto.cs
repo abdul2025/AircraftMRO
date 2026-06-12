@@ -1,8 +1,8 @@
 using AircraftMRO.Domain.Enums;
 
-namespace AircraftMRO.Mvc.ViewModels.Alert
+namespace AircraftMRO.Application.DTOs.Alert
 {
-    public class AlertListViewModel
+    public class AlertListDto
     {
         public int Id { get; set; }
 
@@ -13,6 +13,7 @@ namespace AircraftMRO.Mvc.ViewModels.Alert
         public AlertSeverity Severity { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
         public DateTime? ResolvedAt { get; set; }
 
         public bool IsResolved { get; set; }

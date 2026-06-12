@@ -28,7 +28,7 @@ namespace AircraftMRO.Infrastructure.Data
             return await base.SaveChangesAsync(cancellationToken);
         }
 
-        // Handle Audit Per Each entity and its DB CRUD
+        // Handle Audit Per Each entity and its DB CRUD plus for Delete is always a soft delete
         private void ApplyAuditInformation()
         {
             string? userId = _currentUserService.UserId;

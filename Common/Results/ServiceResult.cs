@@ -30,8 +30,7 @@ public class ServiceResult<T>
         };
     }
 
-    public static ServiceResult<T> ValidationFailure(
-        Dictionary<string, string[]> validationErrors)
+    public static ServiceResult<T> ValidationFailure(Dictionary<string, string[]> validationErrors)
     {
         return new ServiceResult<T>
         {

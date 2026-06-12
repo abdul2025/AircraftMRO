@@ -20,5 +20,5 @@ public interface IAircraftService
 
     Task<ServiceResult<AircraftDeleteDto>> GetForDeleteAsync(int id);
 
-    Task<ServiceResult<Aircraft>> DeleteAsync(int id);
+    Task<ServiceResult<bool>> DeleteAsync(int id);
 }

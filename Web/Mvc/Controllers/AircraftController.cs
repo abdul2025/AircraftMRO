@@ -2,7 +2,6 @@ using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Results;
 using AircraftMRO.Infrastructure.Identity.Constants;
 using AircraftMRO.Domain;
-using AircraftMRO.Mvc.ViewModels.Aircraft;
 using AircraftMRO.Repositories;
 using AircraftMRO.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,12 +14,10 @@ namespace AircraftMRO.Controllers
     public class AircraftController : Controller
     {
         private readonly IAircraftService _aircraftService;
-        private readonly IBaseRepository<Aircraft> _repository;
 
         public AircraftController(IAircraftService aircraftService, IBaseRepository<Aircraft> repository)
         {
             _aircraftService = aircraftService;
-            _repository = repository;
         }
 
         //
@@ -163,7 +160,6 @@ namespace AircraftMRO.Controllers
 
             if (!result.Success)
             {
-                // optional: you can show error view or toast later
                 return NotFound();
             }
 

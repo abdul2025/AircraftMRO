@@ -224,8 +224,9 @@ namespace AircraftMRO.Services
                 if (ex.InnerException is PostgresException postgresEx &&
                     postgresEx.SqlState == PostgresErrorCodes.UniqueViolation)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         "Attempted to create aircraft with duplicate tail number.",
+                        ex,
                         new
                         {
                             dto.TailNumber
@@ -345,13 +346,16 @@ namespace AircraftMRO.Services
         }
 
 
-        public async Task<ServiceResult<Aircraft>> DeleteAsync(int id)
+        public async Task<ServiceResult<bool>> DeleteAsync(int id)
         {
+            
+            
             var aircraft = await _repository.GetByIdAsync(id);
 
             if (aircraft == null)
             {
-                return new ServiceResult<Aircraft>
+
+                return new ServiceResult<bool>
                 {
                     Success = false,
                     ErrorMessage = "Not found"
@@ -361,7 +365,7 @@ namespace AircraftMRO.Services
             await _repository.DeleteAsync(aircraft);
             await _repository.SaveChangesAsync();
 
-            return new ServiceResult<Aircraft> { Success = true };
+            return new ServiceResult<bool> { Success = true };
         }
 
 
@@ -369,8 +373,7 @@ namespace AircraftMRO.Services
         private static Dictionary<string, string[]> MapErrors(FluentValidation.Results.ValidationResult result)
         {
             return result.Errors
-                .GroupBy(e => e.PropertyName)
-                .ToDictionary(
+                .GroupBy(e => e.PropertyName).ToDictionary(
                     g => g.Key,
                     g => g.Select(x => x.ErrorMessage).ToArray()
                 );

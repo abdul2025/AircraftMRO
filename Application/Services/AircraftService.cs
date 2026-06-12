@@ -23,17 +23,13 @@ namespace AircraftMRO.Services
         private readonly ApplicationDbContext _context;
         private readonly IAppLogger<AircraftService> _logger;
         private readonly IBaseRepository<Aircraft> _repository;
-        private readonly IValidator<AircraftEditDto> _editValidator;
-        private readonly IValidator<AircraftCreateDto> _createValidator;
 
 
-        public AircraftService(ApplicationDbContext context, IAppLogger<AircraftService> logger, IBaseRepository<Aircraft> repository, IValidator<AircraftEditDto> editValidator, IValidator<AircraftCreateDto> createValidator)
+        public AircraftService(ApplicationDbContext context, IAppLogger<AircraftService> logger, IBaseRepository<Aircraft> repository)
         {
             _context = context;
             _logger = logger;
             _repository = repository;
-            _editValidator = editValidator;
-            _createValidator = createValidator;
 
         }
 
@@ -194,18 +190,13 @@ namespace AircraftMRO.Services
         {
             try
             {
+                // 1. Sanitize the data
                 dto.TailNumber = dto.TailNumber.Trim();
                 dto.Model = dto.Model.Trim();
                 dto.Manufacturer = dto.Manufacturer.Trim();
 
-                var validation = await _createValidator.ValidateAsync(dto);
 
-                if (!validation.IsValid)
-                {
-                    return ServiceResult<Aircraft>.ValidationFailure(
-                        MapErrors(validation));
-                }
-
+                // 2. Map and Save
                 Aircraft aircraft = new()
                 {
                     TailNumber = dto.TailNumber,
@@ -218,57 +209,24 @@ namespace AircraftMRO.Services
 
                 return ServiceResult<Aircraft>.SuccessResult(aircraft);
             }
-            // Database-specific exceptions
             catch (DbUpdateException ex)
             {
                 if (ex.InnerException is PostgresException postgresEx &&
                     postgresEx.SqlState == PostgresErrorCodes.UniqueViolation)
                 {
-                    _logger.LogError(
-                        "Attempted to create aircraft with duplicate tail number.",
-                        ex,
-                        new
-                        {
-                            dto.TailNumber
-                        });
-
-                    return ServiceResult<Aircraft>.Failure(
-                        "Tail number already exists.");
+                    _logger.LogError("Attempted to create aircraft with duplicate tail number.", ex, new { dto.TailNumber });
+                    return ServiceResult<Aircraft>.Failure("Tail number already exists.");
                 }
 
-                _logger.LogError(
-                    "Database update failed while creating aircraft.",
-                    ex,
-                    new
-                    {
-                        dto.TailNumber,
-                        dto.Model,
-                        dto.Manufacturer
-                    });
-
-                return ServiceResult<Aircraft>.Failure(
-                    "Database update failed.");
+                _logger.LogError("Database update failed while creating aircraft.", ex, new { dto.TailNumber, dto.Model, dto.Manufacturer });
+                return ServiceResult<Aircraft>.Failure("Database update failed.");
             }
-            // Unexpected exceptions
             catch (Exception ex)
             {
-                _logger.LogError(
-                    "Unexpected error while creating aircraft.",
-                    ex,
-                    new
-                    {
-                        dto.TailNumber,
-                        dto.Model,
-                        dto.Manufacturer
-                    });
-
-                return ServiceResult<Aircraft>.Failure(
-                    "Failed to create aircraft.");
+                _logger.LogError("Unexpected error while creating aircraft.", ex, new { dto.TailNumber, dto.Model, dto.Manufacturer });
+                return ServiceResult<Aircraft>.Failure("Failed to create aircraft.");
             }
         }
-
-
-
 
         public async Task<ServiceResult<AircraftEditDto>> GetForEditAsync(int id)
         {
@@ -298,26 +256,40 @@ namespace AircraftMRO.Services
 
         public async Task<ServiceResult<Aircraft>> UpdateAsync(AircraftEditDto dto)
         {
-            // Implement the validator
-            var validation = await _editValidator.ValidateAsync(dto);
-
-            if (!validation.IsValid)
+            try
             {
-                return ServiceResult<Aircraft>.ValidationFailure(
-                    MapErrors(validation));
+                // 1. Sanitize the data
+                dto.Model = dto.Model.Trim();
+                dto.Manufacturer = dto.Manufacturer.Trim();
+
+                // 2. Fetch the entity
+                var aircraft = await _repository.GetByIdAsync(dto.Id);
+
+                if (aircraft == null)
+                    return ServiceResult<Aircraft>.Failure("Aircraft not found.");
+
+                // 3. Map and Save
+                aircraft.Model = dto.Model;
+                aircraft.Manufacturer = dto.Manufacturer;
+
+                await _repository.SaveChangesAsync();
+
+                return ServiceResult<Aircraft>.SuccessResult(aircraft);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "Unexpected error while updating aircraft.",
+                    ex,
+                    new
+                    {
+                        dto.Id,
+                        dto.Model,
+                        dto.Manufacturer
+                    });
 
-            var aircraft = await _repository.GetByIdAsync(dto.Id);
-
-            if (aircraft == null)
-                return ServiceResult<Aircraft>.Failure("Not found");
-
-            aircraft.Model = dto.Model;
-            aircraft.Manufacturer = dto.Manufacturer;
-
-            await _repository.SaveChangesAsync();
-
-            return ServiceResult<Aircraft>.SuccessResult(aircraft);
+                return ServiceResult<Aircraft>.Failure("Failed to update aircraft.");
+            }
         }
 
         public async Task<ServiceResult<AircraftDeleteDto>> GetForDeleteAsync(int id)
@@ -348,8 +320,8 @@ namespace AircraftMRO.Services
 
         public async Task<ServiceResult<bool>> DeleteAsync(int id)
         {
-            
-            
+
+
             var aircraft = await _repository.GetByIdAsync(id);
 
             if (aircraft == null)

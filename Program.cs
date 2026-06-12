@@ -19,6 +19,7 @@ using AircraftMRO.Infrastructure.BackgroundJobs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using AircraftMRO.Application.DTOs.Aircraft.Validators;
+using AircraftMRO.Application.DTOs.MaintenanceRecord.Validators;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -69,8 +70,12 @@ builder.Services.AddControllersWithViews(options =>
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
+// For Aircraft
 builder.Services.AddValidatorsFromAssemblyContaining<AircraftCreateDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AircraftEditDtoValidator>();
+// For Maintenance 
+builder.Services.AddValidatorsFromAssemblyContaining<MaintenanceCreateDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<MaintenanceEditDtoValidator>();
 
 
 

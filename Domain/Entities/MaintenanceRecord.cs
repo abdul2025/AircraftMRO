@@ -9,7 +9,6 @@ namespace AircraftMRO.Domain
     {
         public int Id { get; set; }
 
-        [Required]
         public int WorkOrderId { get; set; }
 
         [ForeignKey(nameof(WorkOrderId))]

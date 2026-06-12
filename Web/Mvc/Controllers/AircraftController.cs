@@ -63,25 +63,20 @@ namespace AircraftMRO.Controllers
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Create(AircraftCreateDto dto)
         {
+            // 1. Let ASP.NET Core & FluentValidation automatically block bad data!
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_Create", dto);
+            }
+
+            // 2. Data is structurally valid, send it to the service
             var result = await _aircraftService.CreateAircraftAsync(dto);
 
+            // 3. Handle Business Rules / Database Errors (e.g., Duplicate Tail Number)
             if (!result.Success)
             {
-                if (result.ValidationErrors != null)
-                {
-                    foreach (var error in result.ValidationErrors)
-                    {
-                        foreach (var msg in error.Value)
-                        {
-                            ModelState.AddModelError(error.Key, msg);
-                        }
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("", result.ErrorMessage!);
-                }
-
+                // We no longer need the complex dictionary mapping loop!
+                ModelState.AddModelError(string.Empty, result.ErrorMessage!);
                 return PartialView("_Create", dto);
             }
 
@@ -110,27 +105,23 @@ namespace AircraftMRO.Controllers
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Edit(AircraftEditDto dto)
         {
-            var result = await _aircraftService.UpdateAsync(dto);
-
-            if (!result.Success)
+            // 1. Automatic FluentValidation check
+            if (!ModelState.IsValid)
             {
-                if (result.ValidationErrors != null)
-                {
-                    foreach (var error in result.ValidationErrors)
-                    {
-                        foreach (var msg in error.Value)
-                        {
-                            ModelState.AddModelError(error.Key, msg);
-                        }
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("", result.ErrorMessage!);
-                }
-
                 return PartialView("_Edit", dto);
             }
+
+            // 2. Send valid data to the service
+            var result = await _aircraftService.UpdateAsync(dto);
+
+            // 3. Handle 'Not Found' or DB Errors
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage!);
+                return PartialView("_Edit", dto);
+            }
+
+            TempData["SuccessMessage"] = "Aircraft updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }

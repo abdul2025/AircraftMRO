@@ -20,6 +20,11 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using AircraftMRO.Application.DTOs.Aircraft.Validators;
 using AircraftMRO.Application.DTOs.MaintenanceRecord.Validators;
+using AircraftMRO.Application.Services;
+using AircraftMRO.Application.Interfaces;
+using AircraftMRO.Infrastructure.Hubs;
+using MediatR;
+using AircraftMRO.Application.Handlers;
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -37,8 +42,9 @@ builder.Host.UseSerilog();
 
 
 
-
-
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(AircraftCreatedEventHandler).Assembly);
+});
 
 
 
@@ -105,6 +111,9 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // IDENTIFY Service 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+
+// Notification
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
 
@@ -212,6 +221,8 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 
+// NotificationHub Routing
+app.MapHub<NotificationHub>("/notificationHub"); 
 
 
 // Routing for the hangfire and Authorization

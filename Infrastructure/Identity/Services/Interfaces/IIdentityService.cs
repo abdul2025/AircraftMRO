@@ -1,6 +1,7 @@
 
 
 using AircraftMRO.Common.Results;
+using AircraftMRO.Infrastructure.Identity.Entities;
 using AircraftMRO.Infrastructure.Models;
 
 namespace AircraftMRO.Infrastructure.Identity.Services.Interfaces

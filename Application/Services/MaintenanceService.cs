@@ -385,7 +385,7 @@ namespace AircraftMRO.Services
             //  ├── WO-2 Open and Priority as Critical 
             //  └── WO-3 Closed
             //       => Aircraft Grounded
-            _aircraftStatusService.UpdateAircraftStatus(workOrder.Aircraft, workOrder.Aircraft.WorkOrders);
+            await _aircraftStatusService.UpdateAircraftStatus(workOrder.Aircraft, workOrder.Aircraft.WorkOrders);
         }
 
 

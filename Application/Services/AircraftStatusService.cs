@@ -3,6 +3,8 @@ using AircraftMRO.Domain;
 using AircraftMRO.Domain.Enums;
 using AircraftMRO.Services.Interfaces;
 using SharedKernel.Logging.Interfaces;
+using MediatR;
+using AircraftMRO.Application.Events;
 
 namespace AircraftMRO.Services
 {
@@ -10,12 +12,14 @@ namespace AircraftMRO.Services
     {
         private readonly IAppLogger<AircraftStatusService> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IMediator _mediator;
 
 
-        public AircraftStatusService(IAppLogger<AircraftStatusService> logger, ApplicationDbContext context)
+        public AircraftStatusService(IAppLogger<AircraftStatusService> logger, ApplicationDbContext context, IMediator mediator)
         {
             _logger = logger;
             _context = context;
+            _mediator = mediator;
         }
         /*
         * Aircraft Status Rules
@@ -75,7 +79,7 @@ namespace AircraftMRO.Services
         * └── WO-3 Open (Low)
         *      => Grounded
         */
-        public void UpdateAircraftStatus(Aircraft aircraft, IEnumerable<WorkOrder> workOrders)
+        public async Task UpdateAircraftStatus(Aircraft aircraft, IEnumerable<WorkOrder> workOrders)
         {
             // Check for Any Open or Inprogress with Critical Priority
             bool hasCritical = workOrders.Any(w =>
@@ -112,6 +116,16 @@ namespace AircraftMRO.Services
                     });
             }
 
+            if (newStatus == AircraftStatus.Grounded && previousStatus != AircraftStatus.Grounded)
+            {
+                // Change single quotes to double quotes for strings
+                await _mediator.Publish(new AircraftCreatedEvent
+                {
+                    AircraftId = aircraft.Id,
+                    Title = "Aircraft Grounded" // C# strings must use double quotes
+                });
+            }
+
 
 
 
@@ -139,6 +153,13 @@ namespace AircraftMRO.Services
                         AircraftStatus = newStatus
                     });
                 }
+
+                // Change single quotes to double quotes for strings
+                await _mediator.Publish(new AircraftCreatedEvent
+                {
+                    AircraftId = aircraft.Id,
+                    Title = "Aircraft Resolved and not Grounded" 
+                });
 
 
             }

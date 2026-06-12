@@ -8,7 +8,8 @@ namespace AircraftMRO.Services.Interfaces
 {
     public interface IAircraftStatusService
     {
-        void UpdateAircraftStatus(Aircraft aircraft, IEnumerable<WorkOrder> workOrders);
+
+        Task UpdateAircraftStatus(Aircraft aircraft, IEnumerable<WorkOrder> workOrders);
 
     }
 }

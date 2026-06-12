@@ -1,0 +1,42 @@
+
+using AircraftMRO.Application.Interfaces;
+using AircraftMRO.Domain.Entities;
+using AircraftMRO.Domain.Enums;
+using AircraftMRO.Infrastructure.Data;
+using AircraftMRO.Infrastructure.Hubs;
+using Microsoft.AspNetCore.SignalR;
+
+namespace AircraftMRO.Application.Services
+{
+    public class NotificationService : INotificationService
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
+
+        public NotificationService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
+        {
+            _context = context;
+            _hubContext = hubContext;
+        }
+
+        public async Task SendNotificationAsync(Notification notification)
+        {
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+            if (notification.Channel == NotificationChannel.InApp || notification.Channel == NotificationChannel.Both)
+            {
+                // If it's a Grounded event, broadcast to everyone
+                if (notification.Type == NotificationType.AircraftGrounded)
+                {
+                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification);
+                }
+                else
+                {
+                    // Otherwise, send to specific user
+                    await _hubContext.Clients.User(notification.UserId).SendAsync("ReceiveNotification", notification);
+                }
+            }
+        }
+    }
+}

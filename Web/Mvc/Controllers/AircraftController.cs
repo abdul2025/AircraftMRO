@@ -147,6 +147,7 @@ namespace AircraftMRO.Controllers
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // TODO: Requiired to validate how the delete is working along side with soft Delete because dele action keeps occurs regardless of the soft delete 
             var result = await _aircraftService.DeleteAsync(id);
 
             if (!result.Success)

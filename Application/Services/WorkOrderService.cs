@@ -168,7 +168,7 @@ namespace AircraftMRO.Services
                 await _repository.AddAsync(workOrder);
 
                 IEnumerable<WorkOrder> workOrders = aircraft.WorkOrders.Append(workOrder);
-                _aircraftStatusService.UpdateAircraftStatus(aircraft, workOrders);
+                await _aircraftStatusService.UpdateAircraftStatus(aircraft, workOrders);
 
                 await _repository.SaveChangesAsync();
 
@@ -251,7 +251,7 @@ namespace AircraftMRO.Services
                     .Include(a => a.WorkOrders)
                     .FirstAsync(a => a.Id == workOrder.AircraftId);
 
-                _aircraftStatusService.UpdateAircraftStatus(aircraft, aircraft.WorkOrders);
+                await _aircraftStatusService.UpdateAircraftStatus(aircraft, aircraft.WorkOrders);
 
                 await _repository.SaveChangesAsync();
 
@@ -308,7 +308,7 @@ namespace AircraftMRO.Services
                     .FirstAsync(a => a.Id == workOrder.AircraftId);
 
                 IEnumerable<WorkOrder> currentWorkOrderInDb = aircraft.WorkOrders.Where(w => w.Id != workOrder.Id);
-                _aircraftStatusService.UpdateAircraftStatus(aircraft, currentWorkOrderInDb);
+                await _aircraftStatusService.UpdateAircraftStatus(aircraft, currentWorkOrderInDb);
 
                 await _repository.SaveChangesAsync();
 

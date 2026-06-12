@@ -123,50 +123,54 @@ function initializeValidation() {
     $.validator.unobtrusive.parse(form);
 }
 
-
 function bindCrudForm() {
-
     const form = document.querySelector('#crudModalContent form');
 
-    if (!form)
-        return;
+    if (!form) return;
 
     form.addEventListener('submit', async function (e) {
-
         e.preventDefault();
 
         if (!$(form).valid()) {
+            notify.warning('Please correct the validation errors.');
             return;
         }
 
         try {
-
             const formData = new FormData(form);
-            const response = await fetch(form.action, {method: form.method, body: formData});
+            const response = await fetch(form.action, { method: form.method, body: formData });
 
+            // 1. SUCCESS: Redirect case
             if (response.redirected) {
-                window.location.href = response.url;
+                // Show success toast before reloading
+                notify.success('Operation completed successfully.');
+                
+                // Slight delay so the user sees the toast before the page refreshes
+                setTimeout(() => {
+                    window.location.href = response.url;
+                }, 1500);
                 return;
             }
 
-            const html =await response.text();
+            // 2. VALIDATION FAILURE: Modal re-rendered with errors
+            if (response.ok) {
+                const html = await response.text();
+                document.getElementById('crudModalContent').innerHTML = html;
 
-            document.getElementById('crudModalContent').innerHTML = html;
+                // Re-initialize everything
+                initializeTomSelect(document.getElementById('crudModalContent'));
+                initializePasswordToggle(document.getElementById('crudModalContent'));
+                initializeValidation();
+                bindCrudForm();
 
-            initializeTomSelect(document.getElementById('crudModalContent')
-            );
-
-            initializePasswordToggle(document.getElementById('crudModalContent')
-            );
-
-            initializeValidation();
-
-            bindCrudForm();
+                // Show error toast for validation failure
+                notify.error('Please correct the errors in the form.');
+            } else {
+                notify.error('A server error occurred.');
+            }
         }
         catch (error) {
-
             console.error(error);
-
             notify.error('An unexpected error occurred.');
         }
     });

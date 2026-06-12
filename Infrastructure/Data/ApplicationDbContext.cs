@@ -41,7 +41,8 @@ namespace AircraftMRO.Infrastructure.Data
                     entry.Entity.CreatedByUserId = userId;
                 }
 
-                if (entry.State == EntityState.Modified)
+                // Only update UpdatedAt if it's NOT a soft delete operation
+                if (!entry.Entity.IsDeleted)
                 {
                     entry.Property(x => x.CreatedAtUtc).IsModified = false;
                     entry.Property(x => x.CreatedByUserId).IsModified = false;
@@ -52,7 +53,6 @@ namespace AircraftMRO.Infrastructure.Data
                 if (entry.State == EntityState.Deleted)
                 {
                     entry.State = EntityState.Modified;
-
                     entry.Entity.IsDeleted = true;
                     entry.Entity.DeletedAtUtc = DateTime.UtcNow;
                     entry.Entity.DeletedByUserId = userId;
@@ -81,8 +81,9 @@ namespace AircraftMRO.Infrastructure.Data
         public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();
         public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
         public DbSet<Alert> Alerts => Set<Alert>();
+        public DbSet<Notification> Notifications => Set<Notification>();
 
-        
+
 
     }
 }

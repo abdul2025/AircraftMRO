@@ -17,7 +17,7 @@ window.notify = {
     }
 };
 
-function showToast(title, message) {
+function showToast(title, message, duration = 5000) {
 
     const toastElement =
         document.getElementById('appToast');
@@ -28,7 +28,10 @@ function showToast(title, message) {
     document.getElementById('toastTitle').textContent = title;
     document.getElementById('toastBody').textContent = message;
 
-    const toast = bootstrap.Toast.getOrCreateInstance(toastElement);
+    const toast = bootstrap.Toast.getOrCreateInstance(toastElement, {
+        delay: duration,
+        autohide: duration !== 0 // If duration is 0, autohide is false
+    });
 
     toast.show();
 }
@@ -59,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = data.message || "";
 
         // Dynamically map directly to your existing Bootstrap toast injector
-        showToast(title, message);
+        showToast(title, message, 20000);
     });
 
     // Fire up the real-time pipeline connection loop

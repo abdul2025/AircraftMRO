@@ -4,6 +4,7 @@ using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
 using AircraftMRO.Infrastructure.Models;
 using Microsoft.AspNetCore.Identity;
 using SharedKernel.Logging.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace AircraftMRO.Infrastructure.Identity.Services;
 
@@ -131,4 +132,7 @@ public class IdentityService : IIdentityService
             }
         };
     }
+
+
+
 }

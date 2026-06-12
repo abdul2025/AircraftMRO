@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AircraftMRO.Application.DTOs.MaintenanceRecord;
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Results;
@@ -12,30 +13,26 @@ namespace AircraftMRO.Services.Interfaces
 {
     public interface IMaintenanceService
     {
-        Task<PagedResult<MaintenanceListViewModel>> GetMaintenanceRecordsAsync(MaintenanceFilter filter);
-        Task<MaintenanceCreateViewModel> GetCreateViewModelAsync();
+        Task<PagedResult<MaintenanceListDto>> GetMaintenanceRecordsAsync(MaintenanceFilter filter);
 
-        // Create
-        Task<MaintenanceCreateViewModel> PopulateCreateViewModelAsync(MaintenanceCreateViewModel viewModel);
+        Task<MaintenanceDetailsDto?> GetMaintenanceRecordDetailsAsync(int id);
 
-        Task<ServiceResult<MaintenanceRecord>> CreateMaintenanceRecordAsync(MaintenanceCreateViewModel viewModel);
+        Task<MaintenanceCreateDto> GetCreateAsync();
 
-        // EDIT
-        Task<MaintenanceEditViewModel?> GetEditViewModelAsync(int id);
+        Task<MaintenanceCreateDto> PopulateCreateAsync(MaintenanceCreateDto dto);
 
-        Task<MaintenanceEditViewModel> PopulateEditViewModelAsync(MaintenanceEditViewModel viewModel);
+        Task<ServiceResult<MaintenanceEditDto?>> GetEditAsync(int id);
 
-        Task<ServiceResult<MaintenanceRecord>> UpdateMaintenanceRecordAsync(MaintenanceEditViewModel viewModel);
+        Task<MaintenanceEditDto> PopulateEditAsync(MaintenanceEditDto dto);
 
-        // DEL
-        Task<MaintenanceDeleteViewModel?> GetDeleteViewModelAsync(int id);
+        Task<ServiceResult<MaintenanceRecord>> CreateAsync(MaintenanceCreateDto dto);
 
-        Task<ServiceResult<MaintenanceRecord>> DeleteMaintenanceRecordAsync(int id);
+        Task<ServiceResult<MaintenanceRecord>> UpdateAsync(MaintenanceEditDto dto);
 
+        Task<ServiceResult<MaintenanceDeleteDto>> GetDeleteAsync(int id);
 
-        // Complated Acton
-        Task<ServiceResult<MaintenanceRecord>> CompleteMaintenanceRecordAsync(int id);
+        Task<ServiceResult<MaintenanceRecord>> DeleteAsync(int id);
 
-        Task<MaintenanceRecordDetailsViewModel?> GetMaintenanceRecordDetailsAsync(int id);
+        Task<ServiceResult<MaintenanceRecord>> CompleteAsync(int id);
     }
 }

@@ -88,6 +88,7 @@ builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 builder.Services.AddScoped<IAircraftStatusService, AircraftStatusService>();
+builder.Services.AddScoped<IAlertService, AlertService>();
 
 // Background Jobs
 builder.Services.AddScoped<AlertJobsService>();

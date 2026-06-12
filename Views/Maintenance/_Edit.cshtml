@@ -1,7 +1,7 @@
+@using AircraftMRO.Application.DTOs.MaintenanceRecord
 @using AircraftMRO.Domain.Enums
-@using AircraftMRO.Mvc.ViewModels.MaintenanceRecord
 
-@model MaintenanceEditViewModel
+@model MaintenanceEditDto
 
 <form asp-action="Edit" method="post">
 
@@ -15,44 +15,34 @@
             Update Maintenance Record
         </h5>
 
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="modal">
+        <button type="button" class="btn-close" data-bs-dismiss="modal">
         </button>
 
     </div>
 
     <div class="modal-body">
 
-        <div asp-validation-summary="ModelOnly"
-             class="text-danger mb-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3">
         </div>
 
         <!-- Work Order -->
 
         <div class="mb-3">
 
-            <label asp-for="WorkOrderId"
-                   class="form-label fw-semibold">
+            <label asp-for="WorkOrderId" class="form-label fw-semibold">
 
                 Work Order
 
             </label>
 
-            <select asp-for="WorkOrderId"
-                    asp-items="Model.WorkOrders"
-                    class="form-select"
-                    data-tom-select
-                    data-placeholder="Search work order...">
-
+            <select asp-for="WorkOrderId" asp-items="@(new SelectList(Model.WorkOrders, "Id", "DisplayText"))"
+                    class="form-select" data-tom-select data-placeholder="Search work order...">
                 <option value="">
                     Select Work Order
                 </option>
-
             </select>
 
-            <span asp-validation-for="WorkOrderId"
-                  class="text-danger small">
+            <span asp-validation-for="WorkOrderId" class="text-danger small">
             </span>
 
         </div>
@@ -61,24 +51,13 @@
 
         <div class="mb-3">
 
-            <label asp-for="Type"
-                   class="form-label fw-semibold">
+            <label asp-for="Type" class="form-label fw-semibold">
             </label>
 
-            <select asp-for="Type"
-                    class="form-select">
-
-                @foreach (MaintenanceType type in Enum.GetValues<MaintenanceType>())
-                {
-                    <option value="@type">
-                        @type
-                    </option>
-                }
-
+            <select asp-for="Type" asp-items="Html.GetEnumSelectList<MaintenanceType>()" class="form-select">
             </select>
 
-            <span asp-validation-for="Type"
-                  class="text-danger small">
+            <span asp-validation-for="Type" class="text-danger small">
             </span>
 
         </div>
@@ -87,25 +66,13 @@
 
         <div class="mb-3">
 
-            <label asp-for="Status"
-                   class="form-label fw-semibold">
+            <label asp-for="Status" class="form-label fw-semibold">
             </label>
 
-            <select asp-for="Status"
-                    class="form-select">
-
-                <option value="@MaintenanceStatus.Scheduled">
-                    Scheduled
-                </option>
-
-                <option value="@MaintenanceStatus.InProgress">
-                    In Progress
-                </option>
-
+            <select asp-for="Status" asp-items="Html.GetEnumSelectList<MaintenanceStatus>()" class="form-select">
             </select>
 
-            <span asp-validation-for="Status"
-                  class="text-danger small">
+            <span asp-validation-for="Status" class="text-danger small">
             </span>
 
         </div>
@@ -114,16 +81,12 @@
 
         <div class="mb-3">
 
-            <label asp-for="ScheduledDate"
-                   class="form-label fw-semibold">
+            <label asp-for="ScheduledDate" class="form-label fw-semibold">
             </label>
 
-            <input asp-for="ScheduledDate"
-                   type="datetime-local"
-                   class="form-control" />
+            <input asp-for="ScheduledDate" type="datetime-local" class="form-control" />
 
-            <span asp-validation-for="ScheduledDate"
-                  class="text-danger small">
+            <span asp-validation-for="ScheduledDate" class="text-danger small">
             </span>
 
         </div>
@@ -132,17 +95,12 @@
 
         <div class="mb-3">
 
-            <label asp-for="Notes"
-                   class="form-label fw-semibold">
+            <label asp-for="Notes" class="form-label fw-semibold">
             </label>
 
-            <textarea asp-for="Notes"
-                      class="form-control"
-                      rows="4"
-                      placeholder="Enter maintenance notes"></textarea>
+            <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Enter maintenance notes"></textarea>
 
-            <span asp-validation-for="Notes"
-                  class="text-danger small">
+            <span asp-validation-for="Notes" class="text-danger small">
             </span>
 
         </div>
@@ -151,16 +109,13 @@
 
     <div class="modal-footer">
 
-        <button type="button"
-                class="btn btn-light border"
-                data-bs-dismiss="modal">
+        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
 
             Cancel
 
         </button>
 
-        <button type="submit"
-                class="btn btn-based">
+        <button type="submit" class="btn btn-based">
 
             Update Maintenance Record
 

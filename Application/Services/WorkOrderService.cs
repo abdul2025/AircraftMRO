@@ -1,14 +1,12 @@
+using AircraftMRO.Application.DTOs.WorkOrder; // Added
 using AircraftMRO.Common.Filters;
 using AircraftMRO.Common.Pagination;
 using AircraftMRO.Common.Results;
 using AircraftMRO.Infrastructure.Data;
 using AircraftMRO.Domain;
 using AircraftMRO.Domain.Enums;
-using AircraftMRO.Mvc.ViewModels.MaintenanceRecord;
-using AircraftMRO.Mvc.ViewModels.WorkOrder;
 using AircraftMRO.Repositories;
 using AircraftMRO.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Logging.Interfaces;
 
@@ -21,27 +19,21 @@ namespace AircraftMRO.Services
         private readonly IAppLogger<WorkOrderService> _logger;
         private readonly IAircraftStatusService _aircraftStatusService;
 
-
-
         public WorkOrderService(ApplicationDbContext context, IAppLogger<WorkOrderService> logger, IBaseRepository<WorkOrder> repository, IAircraftStatusService aircraftStatusService)
         {
             _context = context;
             _logger = logger;
             _repository = repository;
             _aircraftStatusService = aircraftStatusService;
-
         }
 
-        public async Task<PagedResult<WorkOrderListViewModel>> GetWorkOrdersAsync(WorkOrderFilter filter)
+        public async Task<PagedResult<WorkOrderListDto>> GetWorkOrdersAsync(WorkOrderFilter filter)
         {
-            IQueryable<WorkOrder> query = _context.WorkOrders
-                .AsNoTracking();
+            IQueryable<WorkOrder> query = _context.WorkOrders.AsNoTracking();
 
-            // Search
             if (!string.IsNullOrWhiteSpace(filter.Search))
             {
                 string search = filter.Search.Trim();
-
                 bool isIdSearch = int.TryParse(search, out int id);
 
                 query = query.Where(w =>
@@ -52,11 +44,11 @@ namespace AircraftMRO.Services
 
             int totalItems = await query.CountAsync();
 
-            List<WorkOrderListViewModel> items = await query
+            List<WorkOrderListDto> items = await query
                 .OrderByDescending(w => w.CreatedAtUtc)
                 .Skip((filter.PageNumber - 1) * filter.PageSize)
                 .Take(filter.PageSize)
-                .Select(w => new WorkOrderListViewModel
+                .Select(w => new WorkOrderListDto
                 {
                     Id = w.Id,
                     AircraftId = w.Aircraft.Id,
@@ -68,11 +60,10 @@ namespace AircraftMRO.Services
                     CompletedAt = w.CompletedAt,
                     IsDeleted = w.IsDeleted,
                     MaintenanceRecordCount = w.MaintenanceRecords.Count()
-
                 })
                 .ToListAsync();
 
-            return new PagedResult<WorkOrderListViewModel>
+            return new PagedResult<WorkOrderListDto>
             {
                 Items = items,
                 PageNumber = filter.PageNumber,
@@ -81,14 +72,14 @@ namespace AircraftMRO.Services
             };
         }
 
-        public async Task<ServiceResult<WorkOrderDetailsViewModel>> GetDetailsAsync(int id)
+        public async Task<ServiceResult<WorkOrderDetailsDto>> GetDetailsAsync(int id)
         {
             try
             {
-                WorkOrderDetailsViewModel? model = await _context.WorkOrders
+                WorkOrderDetailsDto? dto = await _context.WorkOrders
                     .AsNoTracking()
                     .Where(w => w.Id == id)
-                    .Select(w => new WorkOrderDetailsViewModel
+                    .Select(w => new WorkOrderDetailsDto
                     {
                         Id = w.Id,
                         AircraftId = w.AircraftId,
@@ -104,13 +95,10 @@ namespace AircraftMRO.Services
                         UpdatedAtUtc = w.UpdatedAtUtc,
                         DeletedBy = w.DeletedByUser != null ? w.DeletedByUser.FullName : null,
                         DeletedAtUtc = w.DeletedAtUtc,
-
-
                         MaintenanceRecordCount = w.MaintenanceRecords.Count(),
-
                         MaintenanceRecords = w.MaintenanceRecords
                             .OrderByDescending(m => m.ScheduledDate)
-                            .Select(m => new MaintenanceRecordSummaryViewModel
+                            .Select(m => new MaintenanceRecordSummaryDto
                             {
                                 Id = m.Id,
                                 Type = m.Type,
@@ -124,228 +112,166 @@ namespace AircraftMRO.Services
                     })
                     .FirstOrDefaultAsync();
 
-                if (model is null)
+                if (dto is null)
                 {
-                    return new ServiceResult<WorkOrderDetailsViewModel>
-                    {
-                        Success = false,
-                        ErrorMessage = "Work Order not found."
-                    };
+                    return new ServiceResult<WorkOrderDetailsDto> { Success = false, ErrorMessage = "Work Order not found." };
                 }
 
-                return new ServiceResult<WorkOrderDetailsViewModel>
-                {
-                    Success = true,
-                    Data = model
-                };
+                return new ServiceResult<WorkOrderDetailsDto> { Success = true, Data = dto };
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    "Failed to load work order details.",
-                    ex,
-                    new
-                    {
-                        WorkOrderId = id
-                    });
-
-                return new ServiceResult<WorkOrderDetailsViewModel>
-                {
-                    Success = false,
-                    ErrorMessage = "Failed to load work order details."
-                };
+                _logger.LogError("Failed to load work order details.", ex, new { WorkOrderId = id });
+                return new ServiceResult<WorkOrderDetailsDto> { Success = false, ErrorMessage = "Failed to load work order details." };
             }
         }
 
-
-
-
-
-        public async Task<WorkOrderCreateViewModel> GetCreateViewAsync()
+        public async Task<WorkOrderCreateDto> GetCreateDtoAsync()
         {
-            var model = new WorkOrderCreateViewModel
+            return new WorkOrderCreateDto
             {
                 Aircrafts = await _context.Aircrafts
+                    .AsNoTracking()
                     .OrderBy(a => a.TailNumber)
-                    .Select(a => new SelectListItem
+                    .Select(a => new AircraftLookupDto
                     {
-                        Value = a.Id.ToString(),
-                        Text = $"{a.TailNumber} | {a.Model}"
+                        Id = a.Id,
+                        DisplayText = $"{a.TailNumber} | {a.Model}"
                     })
                     .ToListAsync()
             };
-            return model;
         }
 
-
-        public async Task<ServiceResult<WorkOrder>> CreateAsync(WorkOrderCreateViewModel model)
+        public async Task<ServiceResult<WorkOrder>> CreateAsync(WorkOrderCreateDto dto)
         {
             try
             {
                 Aircraft? aircraft = await _context.Aircrafts
                     .Include(a => a.WorkOrders)
-                    .FirstOrDefaultAsync(a => a.Id == model.AircraftId);
+                    .FirstOrDefaultAsync(a => a.Id == dto.AircraftId);
 
                 if (aircraft is null)
                 {
-                    return new ServiceResult<WorkOrder>
-                    {
-                        Success = false,
-                        ErrorMessage = "Aircraft not found."
-                    };
+                    return new ServiceResult<WorkOrder> { Success = false, ErrorMessage = "Aircraft not found." };
                 }
 
                 WorkOrder workOrder = new()
                 {
-                    AircraftId = model.AircraftId,
-                    Description = model.Description,
-                    Priority = model.Priority,
+                    AircraftId = dto.AircraftId,
+                    Description = dto.Description,
+                    Priority = dto.Priority,
                     Status = WorkOrderStatus.Open,
                     CreatedAtUtc = DateTime.UtcNow,
-
                     Aircraft = aircraft
                 };
 
                 await _repository.AddAsync(workOrder);
 
-                // Include the new work order in the in-memory collection
                 IEnumerable<WorkOrder> workOrders = aircraft.WorkOrders.Append(workOrder);
-
                 _aircraftStatusService.UpdateAircraftStatus(aircraft, workOrders);
 
                 await _repository.SaveChangesAsync();
 
-                _logger.LogInfo(
-                    "Work order created successfully.",
-                    new
-                    {
-                        WorkOrderId = workOrder.Id,
-                        AircraftId = workOrder.AircraftId,
-                        Priority = workOrder.Priority
-                    });
+                _logger.LogInfo("Work order created successfully.", new { WorkOrderId = workOrder.Id, AircraftId = workOrder.AircraftId, Priority = workOrder.Priority });
 
-                return new ServiceResult<WorkOrder>
-                {
-                    Success = true,
-                    Data = workOrder
-                };
+                return new ServiceResult<WorkOrder> { Success = true, Data = workOrder };
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    "Failed to create work order.",
-                    ex);
-
-                return new ServiceResult<WorkOrder>
-                {
-                    Success = false,
-                    ErrorMessage = "Failed to create work order."
-                };
+                _logger.LogError("Failed to create work order.", ex);
+                return new ServiceResult<WorkOrder> { Success = false, ErrorMessage = "Failed to create work order." };
             }
         }
 
-
-
-        public async Task<ServiceResult<WorkOrderEditViewModel>> GetEditViewAsync(int id)
+        public async Task<ServiceResult<WorkOrderEditDto>> GetEditAsync(int id)
         {
-            WorkOrderEditViewModel? model = await _context.WorkOrders
+            WorkOrderEditDto? dto = await _context.WorkOrders
                 .AsNoTracking()
                 .Where(w => w.Id == id)
-                .Select(w => new WorkOrderEditViewModel
+                .Select(w => new WorkOrderEditDto
                 {
                     Id = w.Id,
                     AircraftId = w.AircraftId,
                     AircraftTailNumber = w.Aircraft.TailNumber,
                     Description = w.Description,
-                    Priority = w.Priority,
+                    Priority = w.Priority
                 })
                 .FirstOrDefaultAsync();
 
-            if (model is null)
+            if (dto is null)
             {
-                return new ServiceResult<WorkOrderEditViewModel>
-                {
-                    Success = false,
-                    ErrorMessage = "Work Order not found."
-                };
+                return new ServiceResult<WorkOrderEditDto> { Success = false, ErrorMessage = "Work Order not found." };
             }
 
-            return new ServiceResult<WorkOrderEditViewModel>
-            {
-                Success = true,
-                Data = model
-            };
+            // Populate the dropdown list before sending it to the UI
+            dto = await PopulateEditAsync(dto);
+
+            return new ServiceResult<WorkOrderEditDto> { Success = true, Data = dto };
         }
 
+        public async Task<WorkOrderEditDto> PopulateEditAsync(WorkOrderEditDto dto)
+        {
+            dto.Aircrafts = await _context.Aircrafts
+                .AsNoTracking()
+                .OrderBy(a => a.TailNumber)
+                .Select(a => new AircraftLookupDto
+                {
+                    Id = a.Id,
+                    DisplayText = $"{a.TailNumber} | {a.Model}"
+                })
+                .ToListAsync();
 
-        public async Task<ServiceResult<WorkOrder>> EditAsync(WorkOrderEditViewModel model)
+            return dto;
+        }
+
+        public async Task<ServiceResult<WorkOrder>> EditAsync(WorkOrderEditDto dto)
         {
             try
             {
-                WorkOrder? workOrder = await _repository.GetByIdAsync(model.Id);
+                WorkOrder? workOrder = await _repository.GetByIdAsync(dto.Id);
 
                 if (workOrder is null)
                 {
-                    return new ServiceResult<WorkOrder>
-                    {
-                        Success = false,
-                        ErrorMessage = "Work Order not found."
-                    };
+                    return new ServiceResult<WorkOrder> { Success = false, ErrorMessage = "Work Order not found." };
                 }
 
                 WorkOrderPriority previousPriority = workOrder.Priority;
 
-                workOrder.Description = model.Description;
-                workOrder.Priority = model.Priority;
+                // Update the entity properties
+                workOrder.Description = dto.Description;
+                workOrder.Priority = dto.Priority;
+
+                // If your UI allows the user to change the Aircraft during an edit
+                if (workOrder.AircraftId != dto.AircraftId)
+                {
+                    workOrder.AircraftId = dto.AircraftId;
+                }
 
                 Aircraft aircraft = await _context.Aircrafts
                     .Include(a => a.WorkOrders)
                     .FirstAsync(a => a.Id == workOrder.AircraftId);
 
-
                 _aircraftStatusService.UpdateAircraftStatus(aircraft, aircraft.WorkOrders);
 
                 await _repository.SaveChangesAsync();
 
-                _logger.LogInfo(
-                    "Work order updated successfully.",
-                    new
-                    {
-                        WorkOrderId = workOrder.Id,
-                        PreviousPriority = previousPriority,
-                        NewPriority = workOrder.Priority
-                    });
+                _logger.LogInfo("Work order updated successfully.", new { WorkOrderId = workOrder.Id, PreviousPriority = previousPriority, NewPriority = workOrder.Priority });
 
-                return new ServiceResult<WorkOrder>
-                {
-                    Success = true,
-                    Data = workOrder
-                };
+                return new ServiceResult<WorkOrder> { Success = true, Data = workOrder };
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    "Failed to update work order.",
-                    ex,
-                    new
-                    {
-                        WorkOrderId = model.Id
-                    });
-
-                return new ServiceResult<WorkOrder>
-                {
-                    Success = false,
-                    ErrorMessage = "Failed to update work order."
-                };
+                _logger.LogError("Failed to update work order.", ex, new { WorkOrderId = dto.Id });
+                return new ServiceResult<WorkOrder> { Success = false, ErrorMessage = "Failed to update work order." };
             }
         }
 
-        public async Task<ServiceResult<WorkOrderDeleteViewModel>> GetDeleteViewAsync(int id)
+        public async Task<ServiceResult<WorkOrderDeleteDto>> GetDeleteAsync(int id)
         {
-            WorkOrderDeleteViewModel? model = await _context.WorkOrders
+            WorkOrderDeleteDto? dto = await _context.WorkOrders
                 .AsNoTracking()
                 .Where(w => w.Id == id)
-                .Select(w => new WorkOrderDeleteViewModel
+                .Select(w => new WorkOrderDeleteDto
                 {
                     Id = w.Id,
                     AircraftTailNumber = w.Aircraft.TailNumber,
@@ -353,20 +279,12 @@ namespace AircraftMRO.Services
                 })
                 .FirstOrDefaultAsync();
 
-            if (model is null)
+            if (dto is null)
             {
-                return new ServiceResult<WorkOrderDeleteViewModel>
-                {
-                    Success = false,
-                    ErrorMessage = "Work Order not found."
-                };
+                return new ServiceResult<WorkOrderDeleteDto> { Success = false, ErrorMessage = "Work Order not found." };
             }
 
-            return new ServiceResult<WorkOrderDeleteViewModel>
-            {
-                Success = true,
-                Data = model
-            };
+            return new ServiceResult<WorkOrderDeleteDto> { Success = true, Data = dto };
         }
 
         public async Task<ServiceResult<WorkOrder>> DeleteAsync(int id)
@@ -380,11 +298,7 @@ namespace AircraftMRO.Services
 
                 if (workOrder is null)
                 {
-                    return new ServiceResult<WorkOrder>
-                    {
-                        Success = false,
-                        ErrorMessage = "Work Order not found."
-                    };
+                    return new ServiceResult<WorkOrder> { Success = false, ErrorMessage = "Work Order not found." };
                 }
 
                 await _repository.DeleteAsync(workOrder);
@@ -393,44 +307,20 @@ namespace AircraftMRO.Services
                     .Include(a => a.WorkOrders)
                     .FirstAsync(a => a.Id == workOrder.AircraftId);
 
-
-                IEnumerable<WorkOrder> CurrentWorkOrderInDB = aircraft.WorkOrders.Where(w => w.Id != workOrder.Id);
-                _aircraftStatusService.UpdateAircraftStatus(aircraft, CurrentWorkOrderInDB);
-
+                IEnumerable<WorkOrder> currentWorkOrderInDb = aircraft.WorkOrders.Where(w => w.Id != workOrder.Id);
+                _aircraftStatusService.UpdateAircraftStatus(aircraft, currentWorkOrderInDb);
 
                 await _repository.SaveChangesAsync();
 
-                _logger.LogInfo("Work order deleted successfully.",
-                    new
-                    {
-                        WorkOrderId = workOrder.Id,
-                        AircraftId = workOrder.AircraftId
-                    });
+                _logger.LogInfo("Work order deleted successfully.", new { WorkOrderId = workOrder.Id, AircraftId = workOrder.AircraftId });
 
-                return new ServiceResult<WorkOrder>
-                {
-                    Success = true,
-                    Data = workOrder
-                };
+                return new ServiceResult<WorkOrder> { Success = true, Data = workOrder };
             }
             catch (Exception ex)
             {
-                _logger.LogError("Failed to delete work order.",
-                    ex,
-                    new
-                    {
-                        WorkOrderId = id
-                    });
-
-                return new ServiceResult<WorkOrder>
-                {
-                    Success = false,
-                    ErrorMessage = "Failed to delete work order."
-                };
+                _logger.LogError("Failed to delete work order.", ex, new { WorkOrderId = id });
+                return new ServiceResult<WorkOrder> { Success = false, ErrorMessage = "Failed to delete work order." };
             }
         }
-
-
-
     }
 }

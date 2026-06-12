@@ -1,5 +1,6 @@
+@using AircraftMRO.Application.DTOs.WorkOrder
 @using AircraftMRO.Domain.Enums
-@model AircraftMRO.Mvc.ViewModels.WorkOrder.WorkOrderDetailsViewModel
+@model WorkOrderDetailsDto
 
 @{
     ViewData["Title"] = "Work Order Details";
@@ -398,7 +399,7 @@
 
                         <tbody>
 
-                            @foreach (var record in Model.MaintenanceRecords)
+                            @foreach (MaintenanceRecordSummaryDto record in Model.MaintenanceRecords)
                             {
                                 <tr>
 

@@ -1,10 +1,7 @@
-
+using AircraftMRO.Application.DTOs.WorkOrder; // Swapped ViewModels for DTOs
 using AircraftMRO.Common.Filters;
-using AircraftMRO.Common.Results;
 using AircraftMRO.Infrastructure.Identity.Constants;
 using AircraftMRO.Domain;
-using AircraftMRO.Mvc.ViewModels.WorkOrder;
-using AircraftMRO.Repositories;
 using AircraftMRO.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +11,6 @@ namespace AircraftMRO.Controllers
     public class WorkOrdersController : Controller
     {
         private readonly IWorkOrderService _workOrderService;
-
 
         public WorkOrdersController(IWorkOrderService workOrderService)
         {
@@ -27,12 +23,13 @@ namespace AircraftMRO.Controllers
 
             return View(workOrders);
         }
+
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}, {Roles.Engineer}")]
         public async Task<IActionResult> Details(int id)
         {
             var result = await _workOrderService.GetDetailsAsync(id);
 
-            if (!result.Success)
+            if (!result.Success || result.Data == null)
             {
                 return NotFound();
             }
@@ -43,46 +40,47 @@ namespace AircraftMRO.Controllers
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Create()
         {
-            var model = await _workOrderService.GetCreateViewAsync();
+            var dto = await _workOrderService.GetCreateDtoAsync();
 
-            return PartialView("_Create", model);
+            return PartialView("_Create", dto);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
-        public async Task<IActionResult> Create(WorkOrderCreateViewModel model)
+        public async Task<IActionResult> Create(WorkOrderCreateDto dto)
         {
             if (!ModelState.IsValid)
             {
-                model.Aircrafts = (await _workOrderService.GetCreateViewAsync()).Aircrafts;
+                // Re-populate the dropdown list on validation failure
+                dto.Aircrafts = (await _workOrderService.GetCreateDtoAsync()).Aircrafts;
 
-                return PartialView("_Create", model);
+                return PartialView("_Create", dto);
             }
 
-            var result = await _workOrderService.CreateAsync(model);
+            var result = await _workOrderService.CreateAsync(dto);
 
             if (!result.Success)
             {
                 ModelState.AddModelError(string.Empty,
                     result.ErrorMessage ?? "Failed to create work order.");
 
-                model.Aircrafts = (await _workOrderService.GetCreateViewAsync()).Aircrafts;
+                // Re-populate the dropdown list on error
+                dto.Aircrafts = (await _workOrderService.GetCreateDtoAsync()).Aircrafts;
 
-                return PartialView("_Create", model);
+                return PartialView("_Create", dto);
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            ServiceResult<WorkOrderEditViewModel> result = await _workOrderService.GetEditViewAsync(id);
+            var result = await _workOrderService.GetEditAsync(id);
 
-            if (!result.Success)
+            if (!result.Success || result.Data == null)
             {
                 return NotFound();
             }
@@ -93,20 +91,24 @@ namespace AircraftMRO.Controllers
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(WorkOrderEditViewModel model)
+        public async Task<IActionResult> Edit(WorkOrderEditDto dto)
         {
             if (!ModelState.IsValid)
             {
-                return PartialView("_Edit", model);
+                // Re-populate the dropdown list on validation failure
+                dto = await _workOrderService.PopulateEditAsync(dto);
+                return PartialView("_Edit", dto);
             }
 
-            ServiceResult<WorkOrder> result = await _workOrderService.EditAsync(model);
+            var result = await _workOrderService.EditAsync(dto);
 
             if (!result.Success)
             {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage);
-
-                return PartialView("_Edit", model);
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Failed to edit work order.");
+                
+                // Re-populate the dropdown list on error
+                dto = await _workOrderService.PopulateEditAsync(dto);
+                return PartialView("_Edit", dto);
             }
 
             TempData["SuccessMessage"] = "Work order updated successfully.";
@@ -117,9 +119,9 @@ namespace AircraftMRO.Controllers
         [Authorize(Roles = $"{Roles.Admin},{Roles.MaintenanceManager}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _workOrderService.GetDeleteViewAsync(id);
+            var result = await _workOrderService.GetDeleteAsync(id);
 
-            if (!result.Success)
+            if (!result.Success || result.Data == null)
             {
                 return NotFound();
             }
@@ -141,6 +143,5 @@ namespace AircraftMRO.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
     }
 }

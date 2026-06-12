@@ -1,8 +1,8 @@
+@using AircraftMRO.Application.DTOs.MaintenanceRecord
 @using AircraftMRO.Common.Pagination
 @using AircraftMRO.Domain.Enums
-@using AircraftMRO.Mvc.ViewModels.MaintenanceRecord
 
-@model PagedResult<MaintenanceListViewModel>
+@model PagedResult<MaintenanceListDto>
 
 @{
     ViewData["Title"] = "Maintenance Records";
@@ -152,6 +152,11 @@
                             </th>
 
                             <th class="py-2 based-text text-nowrap">
+                                Deleted
+                            </th>
+                            
+
+                            <th class="py-2 based-text text-nowrap">
                                 Actions
                             </th>
 
@@ -163,7 +168,7 @@
 
                         @if (Model.Items.Any())
                         {
-                            @foreach (var item in Model.Items)
+                            @foreach (MaintenanceListDto item in Model.Items)
                             {
                                 <tr class="text-center align-middle">
 
@@ -251,6 +256,22 @@
                                         @item.CompletedDate?.ToString("dd MMM yyyy hh:mm tt")
                                     </td>
 
+                                    <!-- IsDeleted -->
+                                    <td>
+                                        @if (item.IsDeleted)
+                                        {
+                                            <span class="badge bg-danger">
+                                                YES
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge  bg-success">
+                                                NO
+                                            </span>
+                                        }
+                                    </td>
+
                                     
 
                                     <!-- Actions -->
@@ -261,7 +282,7 @@
 
                                             <!-- Completed -->
 
-                                           @if (item.Status == MaintenanceStatus.Completed)
+                                           @if (item.Status == MaintenanceStatus.Completed || item.IsDeleted)
                                             {
                                                 <button class="btn btn-sm btn-outline-success"
                                                         disabled
@@ -285,7 +306,7 @@
 
                                             <!-- Edit -->
 
-                                            @if (item.Status == MaintenanceStatus.Completed)
+                                            @if (item.Status == MaintenanceStatus.Completed || item.IsDeleted)
                                             {
                                                 <button class="btn btn-sm btn-outline-primary"
                                                         disabled
@@ -307,13 +328,23 @@
                                             }
 
                                             <!-- Delete -->
+                                            @if (item.IsDeleted){
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        disabled
+                                                        title="Record already Deleted ">
 
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                    onclick="openCrudModal('/Maintenance/Delete/@item.Id')">
+                                                    <i class="bi bi-trash"></i>
 
-                                                <i class="bi bi-trash"></i>
+                                                </button>
+                                            }else {
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        onclick="openCrudModal('/Maintenance/Delete/@item.Id')">
 
-                                            </button>
+                                                    <i class="bi bi-trash"></i>
+
+                                                </button>
+                                            }
+                                            
 
                                             <!-- Details -->
                                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light border">

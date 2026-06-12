@@ -1,7 +1,7 @@
+@using AircraftMRO.Application.DTOs.WorkOrder
 @using AircraftMRO.Common.Pagination
-@using AircraftMRO.Mvc.ViewModels.WorkOrder
 
-@model PagedResult<WorkOrderListViewModel>
+@model PagedResult<WorkOrderListDto>
 
 
 
@@ -161,7 +161,7 @@
 
                         @if (Model.Items.Any())
                         {
-                            @foreach (WorkOrderListViewModel item in Model.Items)
+                            @foreach (WorkOrderListDto item in Model.Items)
                             {
                                 <tr class="text-center align-middle">
 
@@ -291,20 +291,40 @@
                                             </a>
 
                                             <!-- Edit -->
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                    onclick="openCrudModal('/WorkOrders/Edit/@item.Id')">
+                                             @if (item.IsDeleted){
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        disabled
+                                                        title="Can not edit"">
 
-                                                <i class="bi bi-pencil"></i>
+                                                    <i class="bi bi-pencil"></i>
 
-                                            </button>
+                                                </button>
+                                             }
+                                             else {
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        onclick="openCrudModal('/WorkOrders/Edit/@item.Id')">
+
+                                                    <i class="bi bi-pencil"></i>
+
+                                                </button>
+                                             }
 
                                             <!-- Delete -->
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                    onclick="openCrudModal('/WorkOrders/Delete/@item.Id')">
+                                            @if (item.IsDeleted){
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        disabled
+                                                        title="Record already Deleted ">
+                                                    <i class="bi bi-trash"></i>
 
-                                                <i class="bi bi-trash"></i>
+                                                </button>
+                                            }else {
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        onclick="openCrudModal('/WorkOrders/Delete/@item.Id')">
 
-                                            </button>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            }
+                                            
 
                                         </div>
 

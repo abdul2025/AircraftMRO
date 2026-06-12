@@ -1,7 +1,7 @@
+@using AircraftMRO.Application.DTOs.WorkOrder
 @using AircraftMRO.Domain.Enums
-@using AircraftMRO.Mvc.ViewModels.WorkOrder
 
-@model WorkOrderCreateViewModel
+@model WorkOrderCreateDto
 
 <form asp-action="Create" method="post">
 
@@ -30,16 +30,9 @@
                 Aircraft
             </label>
 
-            <select asp-for="AircraftId"
-                    asp-items="Model.Aircrafts"
-                    class="form-select"
-                    data-tom-select
-                    data-placeholder="Search aircraft...">
-
-                <option value="">
-                    Select Aircraft
-                </option>
-
+            <select asp-for="AircraftId" asp-items="@(new SelectList(Model.Aircrafts, "Id", "DisplayText"))"
+                    class="form-select">
+                <option value="">Select Aircraft</option>
             </select>
 
             <span asp-validation-for="AircraftId" class="text-danger small">

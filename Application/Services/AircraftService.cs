@@ -12,7 +12,6 @@ using AircraftMRO.Application.DTOs.Aircraft;
 using AircraftMRO.Application.DTOs.Alert;
 using AircraftMRO.Application.DTOs.MaintenanceRecord;
 using AircraftMRO.Application.DTOs.WorkOrder;
-using FluentValidation;
 
 
 namespace AircraftMRO.Services

@@ -30,7 +30,7 @@ function showToast(title, message, duration = 5000) {
 
     const toast = bootstrap.Toast.getOrCreateInstance(toastElement, {
         delay: duration,
-        autohide: duration !== 0 // If duration is 0, autohide is false
+        autohide: duration !== 0 // If duration is 0, autohide is false, which no auto hide
     });
 
     toast.show();
@@ -61,8 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = data.title || "Information";
         const message = data.message || "";
 
-        // Dynamically map directly to your existing Bootstrap toast injector
-        showToast(title, message, 20000);
+        showToast(title, message, 4000);
     });
 
     // Fire up the real-time pipeline connection loop

@@ -1,5 +1,8 @@
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using AircraftMRO.Application.Events;
 using AircraftMRO.Application.Interfaces;
 using AircraftMRO.Domain.Entities;
@@ -7,33 +10,31 @@ using AircraftMRO.Domain.Enums;
 
 namespace AircraftMRO.Application.Handlers
 {
-    public class AircraftGroundedEventHandler : MediatR.INotificationHandler<AircraftGroundedEvent>
+    public class WorkOrderOverdueEventHandler : MediatR.INotificationHandler<WorkOrderOverdueEvent>
     {
         private readonly INotificationService _notificationService;
 
-
-        public AircraftGroundedEventHandler(INotificationService notificationService)
+        public WorkOrderOverdueEventHandler(INotificationService notificationService)
         {
             _notificationService = notificationService;
         }
 
-        public async Task Handle(AircraftGroundedEvent notification, CancellationToken cancellationToken)
+        public async Task Handle(WorkOrderOverdueEvent notification, CancellationToken cancellationToken)
         {
             await _notificationService.SendNotificationAsync(new Notification
             {
-                // IMPORTANT: Since we are using Clients.All for AircraftGrounded, 
                 UserId = "System",
-                Type = NotificationType.AircraftGrounded,
+                Type = NotificationType.OverdueWorkOrder,
                 Channel = NotificationChannel.Both,
-                Title = notification.Title,
-                Message = $"Aircraft {notification.AircraftId} Grounded.",
-                Severity = AlertSeverity.Critical,
+                Title = "Overdue Work Order",
+                Message = $"Work Order {notification.WorkOrderId} for Aircraft {notification.TailNumber} is overdue.",
+                Severity = AlertSeverity.Warning,
                 AircraftId = notification.AircraftId,
                 DataPayload = JsonSerializer.Serialize(new
                 {
+                    workOrderId = notification.WorkOrderId,
                     aircraftId = notification.AircraftId,
-                    status = "Grounded",
-                    url = $"/aircraft/{notification.AircraftId}"
+                    url = $"/workorders/{notification.WorkOrderId}"
                 })
             });
         }

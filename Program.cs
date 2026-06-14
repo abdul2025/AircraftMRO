@@ -43,7 +43,7 @@ builder.Host.UseSerilog();
 
 
 builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(AircraftCreatedEventHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(AircraftGroundedEventHandler).Assembly);
 });
 
 
@@ -99,7 +99,6 @@ builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 builder.Services.AddScoped<IAircraftStatusService, AircraftStatusService>();
-builder.Services.AddScoped<IAlertService, AlertService>();
 
 // Background Jobs
 builder.Services.AddScoped<AlertJobsService>();

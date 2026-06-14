@@ -5,6 +5,7 @@ using AircraftMRO.Services.Interfaces;
 using SharedKernel.Logging.Interfaces;
 using MediatR;
 using AircraftMRO.Application.Events;
+using AircraftMRO.Domain.Entities;
 
 namespace AircraftMRO.Services
 {
@@ -118,8 +119,7 @@ namespace AircraftMRO.Services
 
             if (newStatus == AircraftStatus.Grounded && previousStatus != AircraftStatus.Grounded)
             {
-                // Change single quotes to double quotes for strings
-                await _mediator.Publish(new AircraftCreatedEvent
+                await _mediator.Publish(new AircraftGroundedEvent
                 {
                     AircraftId = aircraft.Id,
                     Title = "Aircraft Grounded" // C# strings must use double quotes
@@ -131,31 +131,32 @@ namespace AircraftMRO.Services
 
             // ******************* ******************* ******************* *******************
 
-            // Resolve active Alerts for Aircraft Back to Active from Grounded. //TODO: THIS SHOULD BE IN ANOTHER SERVICE as Resolve Alerts Service
+            // Resolve active Alerts Notification for Aircraft Back to Active from Grounded. 
+            // TODO: THIS SHOULD BE IN ANOTHER SERVICE as Resolve Alerts Service
             if (previousStatus == AircraftStatus.Grounded && newStatus != AircraftStatus.Grounded)
             {
-                List<Alert> activeAlerts = _context.Alerts
+                List<Notification> activeAlerts = _context.Notifications
                     .Where(a =>
                         a.AircraftId == aircraft.Id &&
                         a.ResolvedAt == null &&
                         a.Title == "Aircraft Grounded")
                     .ToList();
 
-                foreach (Alert alert in activeAlerts)
+                foreach (Notification notification in activeAlerts)
                 {
-                    alert.ResolvedAt = DateTime.UtcNow;
+                    notification.ResolvedAt = DateTime.UtcNow;
 
                     _logger.LogInfo("alert Resolved",
                     new
                     {
-                        Alert = alert.Id,
-                        AircraftId = alert.AircraftId,
+                        Alert = notification.Id,
+                        AircraftId = notification.AircraftId,
                         AircraftStatus = newStatus
                     });
                 }
 
                 // Change single quotes to double quotes for strings
-                await _mediator.Publish(new AircraftCreatedEvent
+                await _mediator.Publish(new AircraftGroundedEvent
                 {
                     AircraftId = aircraft.Id,
                     Title = "Aircraft Resolved and not Grounded" 

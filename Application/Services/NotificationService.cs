@@ -1,5 +1,6 @@
 
 using AircraftMRO.Application.Interfaces;
+using AircraftMRO.Application.NotificationD;
 using AircraftMRO.Domain.Entities;
 using AircraftMRO.Domain.Enums;
 using AircraftMRO.Infrastructure.Data;
@@ -24,17 +25,31 @@ namespace AircraftMRO.Application.Services
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
 
+
+            // Map to DTO (prevents traversal of Aircraft/WorkOrders/EmailNotifications)
+            var dto = new NotificationDto
+            {
+                Id = notification.Id,
+                Title = notification.Title,
+                Message = notification.Message,
+                DataPayload = notification.DataPayload,
+                Type = notification.Type,
+                Severity = notification.Severity,
+                AircraftId = notification.AircraftId,
+                SentAtUtc = notification.SentAtUtc
+            };
+
             if (notification.Channel == NotificationChannel.InApp || notification.Channel == NotificationChannel.Both)
             {
                 // If it's a Grounded event, broadcast to everyone
                 if (notification.Type == NotificationType.AircraftGrounded)
                 {
-                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification);
+                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", dto);
                 }
                 else
                 {
                     // Otherwise, send to specific user
-                    await _hubContext.Clients.User(notification.UserId).SendAsync("ReceiveNotification", notification);
+                    await _hubContext.Clients.User(notification.UserId).SendAsync("ReceiveNotification", dto);
                 }
             }
         }

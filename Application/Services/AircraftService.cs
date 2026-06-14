@@ -77,7 +77,7 @@ namespace AircraftMRO.Services
 
                     WorkOrderCount = a.WorkOrders.Count(),
 
-                    AlertCount = a.Alerts.Count(),
+                    NotificationCount = a.Notifications.Count(), // TODO change to notification
 
                     IsDeleted = a.IsDeleted
                 })
@@ -140,7 +140,7 @@ namespace AircraftMRO.Services
                                 })
                                 .ToList(),
                             // Collection 
-                            LightAlerts = a.Alerts
+                            LightAlerts = a.Notifications
                                 .OrderByDescending(l => l.Id)
                                 .Take(30)
                                 .Select(l => new AlertLightDto

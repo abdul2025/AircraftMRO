@@ -16,21 +16,17 @@ namespace AircraftMRO.Infrastructure.Data.Configurations
 
             builder.HasKey(n => n.Id);
 
-            builder.Property(n => n.UserId)
-                .IsRequired()
-                .HasMaxLength(450); // Matches standard Identity User IDs
+            builder.Property(n => n.UserId).IsRequired().HasMaxLength(450);
+            builder.Property(n => n.Title).IsRequired().HasMaxLength(200);
+            builder.Property(n => n.Message).IsRequired().HasMaxLength(1000);
 
-            builder.Property(n => n.Title)
-                .IsRequired()
-                .HasMaxLength(200);
+            
 
-            builder.Property(n => n.Message)
-                .IsRequired()
-                .HasMaxLength(1000);
-
-            // Indexing for performance (Users query their own notifications constantly)
-            builder.HasIndex(n => n.UserId);
-            builder.HasIndex(n => n.IsRead);
+            // Relationship: One Notification has many EmailNotifications
+            builder.HasMany(n => n.EmailNotifications)
+                .WithOne(e => e.Notification)
+                .HasForeignKey(e => e.NotificationId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

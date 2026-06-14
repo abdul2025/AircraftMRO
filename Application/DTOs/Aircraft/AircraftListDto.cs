@@ -23,6 +23,6 @@ namespace AircraftMRO.Application.DTOs.Aircraft
 
         public int WorkOrderCount { get; set; }
 
-        public int AlertCount { get; set; }
+        public int NotificationCount { get; set; }
     }
 }

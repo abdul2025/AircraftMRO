@@ -3,6 +3,8 @@ using AircraftMRO.Domain;
 using AircraftMRO.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Logging.Interfaces;
+using AircraftMRO.Application.Events;
+using MediatR;
 
 namespace AircraftMRO.Infrastructure.BackgroundJobs
 {
@@ -10,11 +12,13 @@ namespace AircraftMRO.Infrastructure.BackgroundJobs
     {
         private readonly ApplicationDbContext _context;
         private readonly IAppLogger<AlertJobsService> _logger;
+        private readonly IMediator _mediator;
 
-        public AlertJobsService(ApplicationDbContext context, IAppLogger<AlertJobsService> logger)
+        public AlertJobsService(ApplicationDbContext context, IAppLogger<AlertJobsService> logger, IMediator mediator)
         {
             _context = context;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task RunAlertChecks()
@@ -23,7 +27,6 @@ namespace AircraftMRO.Infrastructure.BackgroundJobs
             {
                 _logger.LogInfo("Starting alert background job.");
 
-                await CheckGroundedAircraftAlerts();
                 await CheckOverdueWorkOrdersAlerts();
 
                 _logger.LogInfo("Alert background job completed successfully.");
@@ -37,62 +40,6 @@ namespace AircraftMRO.Infrastructure.BackgroundJobs
             }
         }
 
-        public async Task CheckGroundedAircraftAlerts()
-        {
-            _logger.LogInfo("Checking grounded aircraft alerts.");
-
-        var groundedAircraft = await _context.Aircrafts
-            .Where(a => a.Status == AircraftStatus.Grounded)
-            .Select(a => new
-            {
-                Aircraft = a,
-                CriticalWorkOrderIds = a.WorkOrders
-                    .Where(w =>
-                        w.Priority == WorkOrderPriority.Critical &&
-                        (w.Status == WorkOrderStatus.Open ||
-                        w.Status == WorkOrderStatus.InProgress))
-                    .Select(w => w.Id)
-                    .ToList()
-            })
-            .ToListAsync();
-
-            int createdAlerts = 0;
-
-            foreach (var item in groundedAircraft)
-            {
-                bool alertExists = await _context.Alerts.AnyAsync(a =>
-                    a.AircraftId == item.Aircraft.Id &&
-                    !a.ResolvedAt.HasValue &&
-                    a.Title == "Aircraft Grounded");
-
-                if (alertExists)
-                {
-                    _logger.LogInfo(
-                        $"Grounded alert already exists for Aircraft {item.Aircraft.Id} ({item.Aircraft.TailNumber}).");
-
-                    continue;
-                }
-
-                _context.Alerts.Add(new Alert
-                {
-                    AircraftId = item.Aircraft.Id,
-                    Severity = AlertSeverity.Critical,
-                    Title = "Aircraft Grounded",
-                    Message = $"Aircraft {item.Aircraft.TailNumber} is currently grounded.",
-                    WorkOrderIds = item.CriticalWorkOrderIds
-                });
-
-                createdAlerts++;
-
-                _logger.LogWarning(
-                    $"Created grounded aircraft alert for Aircraft {item.Aircraft.Id} ({item.Aircraft.TailNumber}).");
-            }
-
-            await _context.SaveChangesAsync();
-
-            _logger.LogInfo(
-                $"Grounded aircraft alert check completed. Created {createdAlerts} alert(s).");
-        }
 
         public async Task CheckOverdueWorkOrdersAlerts()
         {
@@ -100,51 +47,42 @@ namespace AircraftMRO.Infrastructure.BackgroundJobs
 
             var threshold = DateTime.UtcNow.AddHours(-24);
 
-            var workOrders = await _context.WorkOrders
+            var overdueWorkOrders = await _context.WorkOrders
                 .Include(w => w.Aircraft)
                 .Where(w =>
-                    (w.Priority == WorkOrderPriority.High ||
-                     w.Priority == WorkOrderPriority.Critical) &&
-                    w.Status != WorkOrderStatus.Closed &&
-                    w.CreatedAtUtc <= threshold)
+                   (
+                        w.Priority == WorkOrderPriority.High || w.Priority == WorkOrderPriority.Critical) &&
+                        w.Status != WorkOrderStatus.Closed &&
+                        w.CreatedAtUtc <= threshold
+                    )
                 .ToListAsync();
 
-            int createdAlerts = 0;
+            int triggeredEvents = 0;
 
-            foreach (var workOrder in workOrders)
+            foreach (var wo in overdueWorkOrders)
             {
-                bool alertExists = await _context.Alerts.AnyAsync(a =>
-                    a.WorkOrderIds.Contains(workOrder.Id) &&
-                    !a.ResolvedAt.HasValue &&
-                    a.Title == "Overdue Work Order");
+                // Check if an active "Overdue" alert already exists for this specific work order
+                // We use DataPayload or a custom field to link, here we check by existing notification message
+                bool exists = await _context.Notifications.AnyAsync(n => n.Type == NotificationType.OverdueWorkOrder
+                                && n.ResolvedAt == null
+                                && n.DataPayload!.Contains(wo.Id.ToString()));
 
-                if (alertExists)
+                if (!exists)
                 {
-                    _logger.LogInfo(
-                        $"Overdue alert already exists for WorkOrder {workOrder.Id}.");
+                    await _mediator.Publish(new WorkOrderOverdueEvent
+                    {
+                        WorkOrderId = wo.Id,
+                        AircraftId = wo.AircraftId,
+                        TailNumber = wo.Aircraft.TailNumber,
+                        Description = wo.Description
+                    });
 
-                    continue;
+                    triggeredEvents++;
+                    _logger.LogWarning($"Triggered WorkOrderOverdueEvent for WorkOrder {wo.Id}.");
                 }
-
-                _context.Alerts.Add(new Alert
-                {
-                    AircraftId = workOrder.AircraftId,
-                    WorkOrderIds = new List<int> { workOrder.Id },
-                    Severity = AlertSeverity.Warning,
-                    Title = "Overdue Work Order",
-                    Message = $"Work Order #{workOrder.Id} has been open for more than 24 hours."
-                });
-
-                createdAlerts++;
-
-                _logger.LogWarning(
-                    $"Created overdue work order alert for WorkOrder {workOrder.Id}.");
             }
 
-            await _context.SaveChangesAsync();
-
-            _logger.LogInfo(
-                $"Overdue work order alert check completed. Created {createdAlerts} alert(s).");
+            _logger.LogInfo($"Overdue work order alert check completed. Triggered {triggeredEvents} event(s).");
         }
     }
 }

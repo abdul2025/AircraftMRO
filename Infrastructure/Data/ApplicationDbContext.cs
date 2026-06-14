@@ -80,8 +80,8 @@ namespace AircraftMRO.Infrastructure.Data
         public DbSet<Aircraft> Aircrafts => Set<Aircraft>();
         public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();
         public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
-        public DbSet<Alert> Alerts => Set<Alert>();
         public DbSet<Notification> Notifications => Set<Notification>();
+        public DbSet<EmailNotification> EmailNotifications => Set<EmailNotification>();
 
 
 

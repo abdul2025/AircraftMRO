@@ -344,7 +344,7 @@ namespace AircraftMRO.Services
                 .Include(w => w.Aircraft)
                     .ThenInclude(a => a.WorkOrders)
                 .Include(w => w.Aircraft)
-                    .ThenInclude(a => a.Alerts)
+                    .ThenInclude(a => a.Notifications) // TODO change it to Notification
                 .FirstOrDefaultAsync(w => w.Id == workOrderId);
 
             if (workOrder == null) return;

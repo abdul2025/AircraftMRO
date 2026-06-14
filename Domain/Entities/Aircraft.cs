@@ -32,10 +32,11 @@ namespace AircraftMRO.Domain
 
 
         // Relationships
-        public ICollection<WorkOrder> WorkOrders { get; set; }
-            = new List<WorkOrder>();
+        // One Aircraft to many WorkOrders
+        public ICollection<WorkOrder> WorkOrders { get; set; } = new List<WorkOrder>();
+        
+        // One Aircraft to many Notifications
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
-        public ICollection<Alert> Alerts { get; set; }
-            = new List<Alert>();
     }
 }

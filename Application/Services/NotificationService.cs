@@ -42,7 +42,7 @@ namespace AircraftMRO.Application.Services
             if (notification.Channel == NotificationChannel.InApp || notification.Channel == NotificationChannel.Both)
             {
                 // If it's a Grounded event, broadcast to everyone
-                if (notification.Type == NotificationType.AircraftGrounded)
+                if (notification.Type == NotificationType.AircraftGrounded || notification.Type ==  NotificationType.OverdueWorkOrder )
                 {
                     await _hubContext.Clients.All.SendAsync("ReceiveNotification", dto);
                 }

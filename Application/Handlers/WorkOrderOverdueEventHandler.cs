@@ -34,6 +34,8 @@ namespace AircraftMRO.Application.Handlers
                 {
                     workOrderId = notification.WorkOrderId,
                     aircraftId = notification.AircraftId,
+                    tailNumber = notification.TailNumber, 
+                    description = $"Work Order {notification.WorkOrderId} is overdue", 
                     url = $"/workorders/{notification.WorkOrderId}"
                 })
             });

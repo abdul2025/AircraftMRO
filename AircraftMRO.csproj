@@ -8,25 +8,46 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentEmail.Core" Version="3.0.2" />
-    <PackageReference Include="FluentEmail.Smtp" Version="3.0.2" />
+    <!-- // Email handling  -->
+    <PackageReference Include="Fluid.Core" Version="2.31.0" />
+    <PackageReference Include="MimeKit" Version="4.17.0" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
+    <!-- Model and request validation  -->
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <!-- Background Jobs -->
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1+1" />
+    <!-- Queuing message for event producer and consumer -->
     <PackageReference Include="MediatR" Version="14.1.0" />
+    
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    
+    
+    <!-- Logging Styling and structure -->
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- External Custom Logger Abstraction from the Native dotnet Logger -->
     <ProjectReference Include="..\SharedLibraries\SharedKernel.Logging\SharedKernel.Logging.csproj" />
   </ItemGroup>
+
+
+
+  <ItemGroup>
+    <!-- Declaring the EmailTemplate Location -->
+    <None Update="EmailTemplates\*.liquid">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+
 
   
 

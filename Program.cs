@@ -23,8 +23,11 @@ using AircraftMRO.Application.DTOs.MaintenanceRecord.Validators;
 using AircraftMRO.Application.Services;
 using AircraftMRO.Application.Interfaces;
 using AircraftMRO.Infrastructure.Hubs;
-using MediatR;
 using AircraftMRO.Application.Handlers;
+using Fluid;
+using AircraftMRO.Application.DTOs.EmailTemplates;
+using AircraftMRO.Application.DTOs.Emails.Settings;
+
 
 // Logging Config
 Log.Logger = new LoggerConfiguration()
@@ -37,13 +40,22 @@ Log.Logger = new LoggerConfiguration()
 
 // Application Configuration Builder
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+// ********************************* //
+// ******** Config START *********** //
+// ********************************* //
+
+
+
 // Serilog
 builder.Host.UseSerilog();
 
 
-
+// MediatR setup it will hook up all events in the for the same Program
 builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(AircraftGroundedEventHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
 
 
@@ -88,7 +100,22 @@ builder.Services.AddValidatorsFromAssemblyContaining<MaintenanceEditDtoValidator
 builder.Services.AddSignalR();
 
 
-// START New Registry of any services
+// Saving Email Template in Fluid memory so no required of read from the server or hosting machine ever time looking for the X template
+TemplateOptions.Default.MemberAccessStrategy.Register<OverdueWorkOrderEmailModel>();
+TemplateOptions.Default.MemberAccessStrategy.Register<GroundedAircraftModel>();
+
+
+// ********************************* //
+// ******** Config END *********** //
+// ********************************* //
+
+
+
+// ********************************* //
+// ***** Service Registry START ****** //
+// ********************************* //
+
+
 // This to handle the generic Log instance, controller , services ...etc.
 builder.Services.AddScoped(typeof(IAppLogger<>), typeof(CustomAppLogger<>));
 // This to handle the generic assigning of model as per each initiate for the BaseRepo
@@ -113,14 +140,24 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 // Notification
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddSingleton<EmailTemplateService>();
 
 
+// Email Service
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ProcessEmailNotifc>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
-// END New Registry of any services
+
+// ********************************* //
+// ***** Service Registry END ****** //
+// ********************************* //
 
 
+// ********************************* //
+// * IDENTITY // ERROR Handling START ** //
+// ********************************* //
 
-// IDENTITY
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
@@ -169,6 +206,10 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
+// ********************************* //
+// * IDENTITY // ERROR Handling END * //
+// ********************************* //
+
 
 
 
@@ -189,6 +230,13 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<AlertJobsService>(
         "alert-checks",
         service => service.RunAlertChecks(),
+        Cron.MinuteInterval(30),
+        new RecurringJobOptions()
+    );
+
+    recurringJobManager.AddOrUpdate<ProcessEmailNotifc>(
+        "Process_Email_Notification",
+        service => service.RunEmailProcessor(),
         Cron.MinuteInterval(30),
         new RecurringJobOptions()
     );
@@ -240,3 +288,5 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+

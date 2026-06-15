@@ -9,5 +9,6 @@ namespace AircraftMRO.Application.Events
     {
         public int AircraftId { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string TailNumber { get; set; } = string.Empty;
     }
 }

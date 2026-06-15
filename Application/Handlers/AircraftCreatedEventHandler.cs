@@ -32,6 +32,8 @@ namespace AircraftMRO.Application.Handlers
                 DataPayload = JsonSerializer.Serialize(new
                 {
                     aircraftId = notification.AircraftId,
+                    tailNumber = notification.TailNumber, 
+                    groundedAt = DateTime.UtcNow, 
                     status = "Grounded",
                     url = $"/aircraft/{notification.AircraftId}"
                 })

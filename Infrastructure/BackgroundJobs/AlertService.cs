@@ -66,7 +66,7 @@ namespace AircraftMRO.Infrastructure.BackgroundJobs
                 bool exists = await _context.Notifications.AnyAsync(n => n.Type == NotificationType.OverdueWorkOrder
                                 && n.ResolvedAt == null
                                 && n.DataPayload!.Contains(wo.Id.ToString()));
-
+                
                 if (!exists)
                 {
                     await _mediator.Publish(new WorkOrderOverdueEvent

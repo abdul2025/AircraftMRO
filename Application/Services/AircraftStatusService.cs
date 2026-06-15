@@ -122,7 +122,8 @@ namespace AircraftMRO.Services
                 await _mediator.Publish(new AircraftGroundedEvent
                 {
                     AircraftId = aircraft.Id,
-                    Title = "Aircraft Grounded" // C# strings must use double quotes
+                    Title = "Aircraft Grounded",
+                    TailNumber = aircraft.TailNumber
                 });
             }
 
@@ -159,7 +160,8 @@ namespace AircraftMRO.Services
                 await _mediator.Publish(new AircraftGroundedEvent
                 {
                     AircraftId = aircraft.Id,
-                    Title = "Aircraft Resolved and not Grounded" 
+                    Title = "Aircraft Resolved and not Grounded",
+                    TailNumber = aircraft.TailNumber
                 });
 
 

@@ -1,0 +1,28 @@
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background-color: #333; color: white; padding: 15px; border-radius: 5px 5px 0 0; }
+        .details { margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 0 0 5px 5px; }
+        .urgent { color: #d9534f; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Aircraft Grounding Notification: {{ TailNumber | default: "N/A" }}</h1>
+    </div>
+    
+    <div class="details">
+        <p>Aircraft ID <strong>{{ AircraftId }}</strong> has been marked as <strong>{{ Status }}</strong>.</p>
+        
+        <table>
+            <tr><td><strong>Grounded At:</strong></td><td>{{ GroundedAt | date: "%Y-%m-%d %H:%M" }}</td></tr>
+            <tr><td><strong>System Link:</strong></td><td><a href="{{ Url }}">View in System</a></td></tr>
+        </table>
+    </div>
+
+    <p>Please initiate the recovery workflow immediately.</p>
+</body>
+</html>

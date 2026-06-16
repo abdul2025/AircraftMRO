@@ -64,7 +64,7 @@ namespace AircraftMRO.Application.Services
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
 
-                _logger.LogInfo("Email sent successfully to {Recipient}", to);
+                _logger.LogInfo("Email sent successfully to: ", to);
             }
             catch (Exception ex)
             {

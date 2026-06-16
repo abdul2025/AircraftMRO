@@ -10,6 +10,7 @@
   <ItemGroup>
     <!-- // Email handling  -->
     <PackageReference Include="Fluid.Core" Version="2.31.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
     <PackageReference Include="MimeKit" Version="4.17.0" />
     <PackageReference Include="MailKit" Version="4.17.0" />
     <!-- Model and request validation  -->
@@ -29,8 +30,16 @@
     
     
     <!-- Logging Styling and structure -->
-    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+
+    <!-- API Documentation -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.3" />
+
+
+
+
   </ItemGroup>
 
   <ItemGroup>

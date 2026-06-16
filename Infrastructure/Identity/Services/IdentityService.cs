@@ -13,12 +13,14 @@ public class IdentityService : IIdentityService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IAppLogger<IdentityService> _logger;
+    private readonly ITokenService _tokenService;
 
-    public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAppLogger<IdentityService> logger)
+    public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAppLogger<IdentityService> logger, ITokenService tokenService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _tokenService = tokenService;
     }
 
     public async Task<AuthResult> AuthenticateAsync(string email, string password)
@@ -62,6 +64,7 @@ public class IdentityService : IIdentityService
     public async Task LogoutAsync()
     {
         await _signInManager.SignOutAsync();
+        
 
         _logger.LogInfo("User logged out");
     }
@@ -100,7 +103,7 @@ public class IdentityService : IIdentityService
                 ErrorMessage = string.Join(Environment.NewLine, createResult.Errors.Select(e => e.Description))
             };
         }
-
+        //TODO:  Validate is Valid Role (request.Role)
         var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
 
         if (!roleResult.Succeeded)
@@ -130,6 +133,29 @@ public class IdentityService : IIdentityService
                 UserId = user.Id,
                 FullName = user.FullName
             }
+        };
+    }
+
+
+
+
+
+    public async Task<AuthResult> ValidateCredentialsAsync(string email, string password)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user != null && await _userManager.CheckPasswordAsync(user, password))
+        {
+            var token = await _tokenService.GenerateToken(user);
+            return new AuthResult
+            {
+                Succeeded = true,
+                AccessToken = token
+            };
+        }
+        return new AuthResult
+        {
+            Succeeded = false,
+            ErrorMessage = "Invalid email or password."
         };
     }
 

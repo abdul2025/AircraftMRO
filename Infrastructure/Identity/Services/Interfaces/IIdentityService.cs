@@ -11,5 +11,8 @@ namespace AircraftMRO.Infrastructure.Identity.Services.Interfaces
         Task<AuthResult> AuthenticateAsync(string email, string password);
         Task<ServiceResult<CreateUserResult>> CreateUserAsync(CreateUserRequest request);
         Task LogoutAsync();
+
+        // API usage for token not cookies validation
+        Task<AuthResult> ValidateCredentialsAsync(string email, string password);
     }
 }

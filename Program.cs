@@ -295,6 +295,8 @@ if (app.Environment.IsDevelopment())
     // OpenAPI JSON endpoint
     app.MapOpenApi();
 
+    // https://localhost:<port>/openapi/v1.json
+
     // Interactive API UI
     app.MapScalarApiReference();
 

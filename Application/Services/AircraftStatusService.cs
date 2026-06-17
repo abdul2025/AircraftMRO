@@ -116,7 +116,7 @@ namespace AircraftMRO.Services
                         NewStatus = newStatus
                     });
             }
-
+            // Aircraft is Grounded
             if (newStatus == AircraftStatus.Grounded && previousStatus != AircraftStatus.Grounded)
             {
                 await _mediator.Publish(new AircraftGroundedEvent
@@ -132,7 +132,7 @@ namespace AircraftMRO.Services
 
             // ******************* ******************* ******************* *******************
 
-            // Resolve active Alerts Notification for Aircraft Back to Active from Grounded. 
+            // UnGrounded Aircraft and Resolve active Alerts Notification for Aircraft Back to Active from Grounded. 
             // TODO: THIS SHOULD BE IN ANOTHER SERVICE as Resolve Alerts Service
             if (previousStatus == AircraftStatus.Grounded && newStatus != AircraftStatus.Grounded)
             {
@@ -156,7 +156,6 @@ namespace AircraftMRO.Services
                     });
                 }
 
-                // Change single quotes to double quotes for strings
                 await _mediator.Publish(new AircraftGroundedEvent
                 {
                     AircraftId = aircraft.Id,

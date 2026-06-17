@@ -41,12 +41,9 @@ namespace AircraftMRO.Infrastructure.Data
                     entry.Entity.CreatedByUserId = userId;
                 }
 
-                // Only update UpdatedAt if it's NOT a soft delete operation
-                if (!entry.Entity.IsDeleted)
+                
+                if (!entry.Entity.IsDeleted && entry.State != EntityState.Added)
                 {
-                    entry.Property(x => x.CreatedAtUtc).IsModified = false;
-                    entry.Property(x => x.CreatedByUserId).IsModified = false;
-
                     entry.Entity.UpdatedAtUtc = DateTime.UtcNow;
                     entry.Entity.UpdatedByUserId = userId;
                 }

@@ -2,206 +2,102 @@
     ViewData["Title"] = "Home";
 }
 
-
 <div class="container py-5">
 
-    <!-- Hero Section -->
-    <div class="text-center mb-5">
+    <div class="mb-5">
+        <h1 class="fw-bold based-text">Aircraft Maintenance System</h1>
+        <p class="text-secondary fs-5">Select a module to get started.</p>
+    </div>
 
-        <h1 class=" fw-bold based-text"
-            >
-            Aircraft Maintenance System
-        </h1>
+    <!-- Core Modules -->
+    <p class="text-uppercase text-secondary fw-semibold mb-3" style="font-size:11px; letter-spacing:.06em">
+        Core modules
+    </p>
+    <div class="row g-4 mb-5">
 
-        <p class="lead text-secondary mt-3">
-            Smart management platform for aircraft operations,
-            maintenance tracking, work orders, and critical alerts.
-        </p>
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-airplane-engines fs-1 based-text"></i></div>
+                    <h4 class="fw-semibold based-text">Aircraft</h4>
+                    <p class="text-muted small text-secondary">Manage aircraft fleet details, operational status, and records.</p>
+                    <a asp-controller="Aircraft" asp-action="Index"
+                       class="btn rounded-pill px-4 text-white btn-based">Open</a>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-clipboard-check fs-1 based-text"></i></div>
+                    <h4 class="fw-semibold based-text">Work Orders</h4>
+                    <p class="text-muted small text-secondary">Create, assign, and monitor engineering work orders.</p>
+                    <a asp-controller="WorkOrders" asp-action="Index"
+                       class="btn rounded-pill px-4 text-white btn-based">Open</a>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-tools fs-1 based-text"></i></div>
+                    <h4 class="fw-semibold based-text">Maintenance</h4>
+                    <p class="text-muted small text-secondary">Track preventive and corrective maintenance activities efficiently.</p>
+                    <a asp-controller="Maintenance" asp-action="Index"
+                       class="btn rounded-pill px-4 text-white btn-based">Open</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 pe-none">
+            <div class="card border-0 shadow-sm rounded-4 h-100 opacity-50">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-bell-fill fs-1 text-danger"></i></div>
+                    <h4 class="fw-semibold based-text">Alerts</h4>
+                    <p class="text-muted small text-secondary">Monitor important operational notifications and system alerts.</p>
+                    <div class="mt-2 mb-3">
+                        <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 fw-normal">
+                            <i class="bi bi-clock-fill me-1"></i> Under Development
+                        </span>
+                    </div>
+                    <button class="btn rounded-pill px-4 text-white btn-based disabled" style="opacity:0.6">Coming Soon</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3 pe-none">
+            <div class="card border-0 shadow-sm rounded-4 h-100 opacity-50">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-patch-check-fill fs-1 text-success"></i></div>
+                    <h4 class="fw-semibold based-text">Certifications</h4>
+                    <p class="text-muted small text-secondary">Personnel and aircraft regulatory compliance management.</p>
+                    <div class="mt-2 mb-3">
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-normal">
+                            <i class="bi bi-calendar-event me-1"></i> Q3 2026 Release
+                        </span>
+                    </div>
+                    <button class="btn rounded-pill px-4 text-white btn-based disabled" style="opacity:0.6">Coming Soon</button>
+                </div>
+            </div>
+        </div>
 
     </div>
 
-    <!-- Dashboard Cards -->
+    <!-- Administration -->
+    <p class="text-uppercase text-secondary fw-semibold mb-3" style="font-size:11px; letter-spacing:.06em">
+        Administration
+    </p>
     <div class="row g-4">
 
-        <!-- Aircraft -->
         <div class="col-md-6 col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body text-center p-4">
-
-                    <div class="mb-3">
-                        <i class="bi bi-airplane-engines fs-1 based-text"
-                           ></i>
-                    </div>
-
-                    <h4 class="fw-semibold based-text">
-                        Aircraft
-                    </h4>
-
-                    <p class="text-muted small text-secondary">
-                        Manage aircraft fleet details,
-                        operational status, and records.
-                    </p>
-
-                    <a asp-controller="Aircraft"
-                       asp-action="Index"
-                       class="btn rounded-pill px-4 text-white btn-based text-white">
-
-                        Open
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Work Orders -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body text-center p-4">
-
-                    <div class="mb-3">
-                        <i class="bi bi-clipboard-check fs-1 based-text"
-                           ></i>
-                    </div>
-
-                    <h4 class="fw-semibold based-text">
-                        Work Orders
-                    </h4>
-
-                    <p class="text-muted small text-secondary">
-                        Create, assign, and monitor
-                        engineering work orders.
-                    </p>
-
-                    <a asp-controller="WorkOrders"
-                       asp-action="Index"
-                       class="btn rounded-pill px-4 text-white btn-based">
-
-                        Open
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Maintenance -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body text-center p-4">
-
-                    <div class="mb-3">
-                        <i class="bi bi-tools fs-1 based-text"
-                           ></i>
-                    </div>
-
-                    <h4 class="fw-semibold based-text">
-                        Maintenance
-                    </h4>
-
-                    <p class="text-muted small text-secondary">
-                        Track preventive and corrective
-                        maintenance activities efficiently.
-                    </p>
-
-                    <a asp-controller="Maintenance"
-                       asp-action="Index"
-                       class="btn rounded-pill px-4 text-white btn-based">
-
-                        Open
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Alerts -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body text-center p-4">
-
-                    <div class="mb-3">
-                        <i class="bi bi-bell-fill fs-1 text-danger"></i>
-                    </div>
-
-                    <h4 class="fw-semibold based-text">
-                        Alerts
-                    </h4>
-
-                    <p class="text-muted small text-secondary">
-                        Monitor important operational
-                        notifications and system alerts.
-                    </p>
-
-                    <a asp-controller="Alert"
-                       asp-action="Index"
-                       class="btn btn-outline-danger rounded-pill px-4 text-white btn-based">
-
-                        Open
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
-
-
-        <!-- certifications -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body text-center p-4">
-
-                    <div class="mb-3">
-                        <i class="bi bi-patch-check-fill fs-1 text-success"></i>
-                    </div>
-
-                    <h4 class="fw-semibold based-text">
-                        certifications
-                    </h4>
-
-                    <p class="text-muted small text-secondary">
-                        Certifications Management
-                    </p>
-
-                    <a asp-controller="Alert"
-                       asp-action="Index"
-                       class="btn rounded-pill px-4 text-white btn-based disabled">
-
-                        Open
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
-         <!-- Hangfire -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-
-                <div class="card-body text-center p-4">
-
-                    <div class="mb-3">
-                        <i class="bi bi-gear-wide-connected fs-1 text-primary"></i>
-                    </div>
-
-                    <h4 class="fw-semibold based-text">
-                        Background Jobs Hangfire
-                    </h4>
-
-                    <p class="text-muted small text-secondary">
-                         Jobs Management
-                    </p>
-
-                    <a href="/hangfire"
-                    class="btn rounded-pill px-4 text-white btn-based">
-                        Open
-                    </a>
-
+                    <div class="mb-3"><i class="bi bi-gear-wide-connected fs-1 text-primary"></i></div>
+                    <h4 class="fw-semibold based-text">Background Jobs</h4>
+                    <p class="text-muted small text-secondary">Hangfire scheduling and queue management.</p>
+                    <a href="/hangfire" class="btn rounded-pill px-4 text-white btn-based">Open</a>
                 </div>
             </div>
         </div>

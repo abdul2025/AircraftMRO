@@ -1,31 +1,20 @@
 using AircraftMRO.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Logging.Interfaces;
-using SharedKernel.Logging.Infrastructure;
 using Serilog;
-using AircraftMRO.Services;
-using AircraftMRO.Services.Interfaces;
-using AircraftMRO.Repositories;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
-using AircraftMRO.Infrastructure.Identity.Entities;
 using AircraftMRO.Infrastructure.Identity.Seeders;
 using Microsoft.AspNetCore.Authorization;
 using AircraftMRO.Infrastructure.Hangfire;
-using AircraftMRO.Infrastructure.Identity.Services.Interfaces;
-using AircraftMRO.Infrastructure.Identity.Services;
 using AircraftMRO.Infrastructure.BackgroundJobs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using AircraftMRO.Application.DTOs.Aircraft.Validators;
 using AircraftMRO.Application.DTOs.MaintenanceRecord.Validators;
-using AircraftMRO.Application.Services;
-using AircraftMRO.Application.Interfaces;
 using AircraftMRO.Infrastructure.Hubs;
 using Fluid;
 using AircraftMRO.Application.DTOs.EmailTemplates;
-using AircraftMRO.Application.DTOs.Emails.Settings;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -33,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using AircraftMRO.Common.Results;
 using System.Text.Json;
 using Scalar.AspNetCore;
+using AircraftMRO.Common.Extensions;
 
 
 
@@ -83,7 +73,7 @@ builder.Services.AddHangfire(config =>
 builder.Services.AddHangfireServer();
 
 
-// Global mvc Authorization
+// Global MVC Authorization
 builder.Services.AddControllersWithViews(options =>
 {
     var mvcPolicy = new AuthorizationPolicyBuilder()
@@ -94,7 +84,7 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AuthorizeFilter(mvcPolicy));
 });
 
-// FluentValidation
+// **** FluentValidation ****
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 // For Aircraft
@@ -115,6 +105,7 @@ TemplateOptions.Default.MemberAccessStrategy.Register<GroundedAircraftModel>();
 
 
 // OpenApi Documentation
+// https://localhost:<port>/openapi/v1.json
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
@@ -126,63 +117,12 @@ builder.Services.AddOpenApi(options =>
         return Task.CompletedTask;
     });
 });
-// https://localhost:<port>/openapi/v1.json
-
-
-// ********************************* //
-// ******** Config END *********** //
-// ********************************* //
 
 
 
-// ********************************* //
-// ***** Service Registry START ****** //
-// ********************************* //
 
 
-// This to handle the generic Log instance, controller , services ...etc.
-builder.Services.AddScoped(typeof(IAppLogger<>), typeof(CustomAppLogger<>));
-// This to handle the generic assigning of model as per each initiate for the BaseRepo
-builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-
-// Domain and Business 
-builder.Services.AddScoped<IAircraftService, AircraftService>();
-builder.Services.AddScoped<IWorkOrderService, WorkOrderService>();
-builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
-builder.Services.AddScoped<IAircraftStatusService, AircraftStatusService>();
-
-// Background Jobs
-builder.Services.AddScoped<AlertJobsService>();
-
-// Audit entity Globally 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-
-// IDENTIFY Service 
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IIdentityService, IdentityService>();
-
-// Notification
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddSingleton<EmailTemplateService>();
-
-
-// Email Service
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ProcessEmailNotifc>();
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-
-
-// ********************************* //
-// ***** Service Registry END ****** //
-// ********************************* //
-
-
-// ********************************* //
-// * IDENTITY // ERROR Handling START ** //
-// ********************************* //
-
+// **** IDENTITY Config --- ERROR Handling Config START **** //
 builder.Services.AddAuthentication(options =>
 {
     // let the Authorize attributes decide in controller
@@ -220,27 +160,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services
-    .AddIdentity<ApplicationUser, IdentityRole>(options =>
-    {
-        options.User.RequireUniqueEmail = true;
 
-        options.Password.RequiredLength = 6;
-        options.Password.RequireDigit = true;
-        // options.Password.RequiredUniqueChars = 4;
-        // options.Password.RequireUppercase = true;
-        // options.Password.RequireLowercase = true;
-        // options.Password.RequireNonAlphanumeric = true;
-    })
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
 
 // config and path 
 // config header and status for unauth and unauthenticated, where JS fetch will handle it.
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // Already Declared by ASP.NET Identity BUT keep it
-    options.AccessDeniedPath = "/Error/403"; // For UnAuthorized Redirecting
+    options.LoginPath = "/Account/Login"; // Already Declared by ASP.NET Identity BUT good keep
+    options.AccessDeniedPath = "/Error/403"; // For unauthorized Redirecting
 
 
     options.Events.OnRedirectToAccessDenied = context =>
@@ -290,8 +217,35 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
+// **** IDENTITY Config --- ERROR Handling Config END **** //
+
+
 // ********************************* //
-// * IDENTITY // ERROR Handling END * //
+// ******** Config END *********** //
+// ********************************* //
+
+
+
+// ********************************* //
+// ***** Service Registry START ****** //
+// ********************************* //
+
+// **** Service.Extensions ****
+// Application Services
+builder.Services.AddApplicationServices(builder.Configuration);
+
+// **** Service.Extensions ****
+// IDENTIFY and active Requester Services
+builder.Services.AddIdentityServices();
+
+
+// Background Jobs
+builder.Services.AddScoped<AlertJobsService>();
+builder.Services.AddScoped<ProcessEmailNotifc>();
+
+
+// ********************************* //
+// ***** Service Registry END ****** //
 // ********************************* //
 
 
@@ -350,9 +304,6 @@ if (app.Environment.IsDevelopment())
 // Handles status codes like that has no Body or content so it redirect to the ErrorController
 app.UseStatusCodePagesWithReExecute("/Error/{0}"); // it will look for ErrorController
 
-
-
-
 app.UseHttpsRedirection();
 app.UseRouting();
 
@@ -383,9 +334,7 @@ app.MapControllers();
 // MVC Routing
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Home}/{action=Index}/{id?}").WithStaticAssets();
 
 app.Run();
 

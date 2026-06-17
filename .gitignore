@@ -53,12 +53,6 @@ logs/
 publish/
 *.pubxml.user
 
-# User secrets
-
-secrets.json
-*.env
-*.local
-*.sh
 
 
 # Coverage
@@ -81,4 +75,5 @@ coverage/
 *.DS_Store
 *.sublime-workspace
 *.sublime-project
-.env_debugger
+Properties/launchSettings.json
+*.sh
